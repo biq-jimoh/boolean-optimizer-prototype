@@ -6,12 +6,19 @@ for bankruptcy court transcript searches.
 
 import asyncio
 import json
+import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, ModelSettings
 import time
 from datetime import datetime
+
+# Import new modules for web search functionality
+from citation_detector import CitationDetector
+from brave_search_service import BraveSearchService
+from content_validator import ContentValidator
+from content_extractor import ContentExtractor
 
 
 # Structured output models for consultants
@@ -73,7 +80,8 @@ class BankruptcyQueryOptimizer:
                  executive_path: str = "prompts/executive/executive-agent.txt",
                  model: str = "gpt-4.1",
                  temperature: float = 0.1,
-                 enable_logging: bool = True):
+                 enable_logging: bool = True,
+                 brave_api_key: Optional[str] = None):
         self.consultants_dir = Path(consultants_dir)
         self.executive_path = Path(executive_path)
         self.model = model
@@ -84,6 +92,20 @@ class BankruptcyQueryOptimizer:
         self.consultant_agents = []
         self.executive_agent = None
         self.enable_logging = enable_logging
+        
+        # Initialize web search components
+        self.citation_detector = CitationDetector(model=model, temperature=temperature)
+        self.brave_api_key = brave_api_key or os.getenv("BRAVE_SEARCH_API_KEY")
+        if self.brave_api_key:
+            self.brave_search = BraveSearchService(api_key=self.brave_api_key)
+            self.content_validator = ContentValidator(model=model, temperature=temperature)
+            self.content_extractor = ContentExtractor()
+        else:
+            self._log("Warning: BRAVE_SEARCH_API_KEY not found. SI-7 and SI-8 will run without web enhancement.")
+            self.brave_search = None
+            self.content_validator = None
+            self.content_extractor = None
+        
         self._load_agents()
     
     def _log(self, message: str):
@@ -166,6 +188,125 @@ Example response without recommendations:
             self._log(f"Error loading executive agent: {e}")
             raise
     
+    async def _pre_scan_for_citations(self, query: str) -> Dict[str, str]:
+        """
+        Pre-scans query for citations and fetches content.
+        Returns enhanced queries for SI-7 and SI-8.
+        """
+        enhanced_queries = {}
+        
+        if not self.brave_search:
+            return enhanced_queries
+        
+        # Check for statute citation
+        statute_task = asyncio.create_task(self._check_and_fetch_statute(query))
+        # Check for case citation  
+        case_task = asyncio.create_task(self._check_and_fetch_case(query))
+        
+        # Wait for both checks to complete
+        statute_result, case_result = await asyncio.gather(
+            statute_task, case_task, return_exceptions=True
+        )
+        
+        if isinstance(statute_result, str) and statute_result:
+            enhanced_queries['statute_enhanced_query'] = statute_result
+        
+        if isinstance(case_result, str) and case_result:
+            enhanced_queries['case_enhanced_query'] = case_result
+            
+        return enhanced_queries
+    
+    async def _check_and_fetch_statute(self, query: str) -> Optional[str]:
+        """
+        Detects statute citation and fetches content from law.cornell.edu
+        """
+        try:
+            # 1. Quick LLM check for statute
+            citation_info = await self.citation_detector.detect_statute_citation(query)
+            if not citation_info or not citation_info.get('found'):
+                return None
+                
+            self._log(f"Detected statute citation: {citation_info['citation']}")
+            
+            # 2. Search on law.cornell.edu
+            search_results = await self.brave_search.search_statute(
+                citation_info['normalized']
+            )
+            
+            if not search_results:
+                self._log("No search results found for statute")
+                return None
+                
+            # 3. Validate first result
+            validation = await self.content_validator.validate_statute_result(
+                citation_info['citation'], 
+                search_results[0]
+            )
+            
+            if not validation.is_valid:
+                self._log(f"Validation failed: {validation.reason}")
+                return None
+                
+            self._log(f"Valid statute page found: {search_results[0]['url']}")
+            
+            # 4. Extract content
+            content = await self.content_extractor.extract_statute_text(
+                search_results[0]['url'],
+                citation_info.get('subsection')
+            )
+            
+            # 5. Return enhanced query
+            return f"{query}\n\nSTATUTE TEXT FROM {search_results[0]['url']}:\n{content}"
+            
+        except Exception as e:
+            self._log(f"Error in statute pre-scan: {e}")
+            return None
+    
+    async def _check_and_fetch_case(self, query: str) -> Optional[str]:
+        """
+        Detects case citation and fetches content from courtlistener.com
+        """
+        try:
+            # 1. Quick LLM check for case
+            case_info = await self.citation_detector.detect_case_citation(query)
+            if not case_info or not case_info.get('found'):
+                return None
+                
+            self._log(f"Detected case citation: {case_info['case_name']}")
+            
+            # 2. Search on courtlistener.com
+            search_results = await self.brave_search.search_case(
+                case_info['search_format']
+            )
+            
+            if not search_results:
+                self._log("No search results found for case")
+                return None
+                
+            # 3. Validate first result
+            validation = await self.content_validator.validate_case_result(
+                case_info['case_name'], 
+                search_results[0]
+            )
+            
+            if not validation.is_valid:
+                self._log(f"Validation failed: {validation.reason}")
+                return None
+                
+            self._log(f"Valid case opinion found: {search_results[0]['url']}")
+            
+            # 4. Extract content
+            content = await self.content_extractor.extract_case_text(
+                search_results[0]['url']
+            )
+            
+            # 5. Return enhanced query
+            return f"{query}\n\nCASE OPINION TEXT FROM {search_results[0]['url']}:\n{content}"
+            
+        except Exception as e:
+            self._log(f"Error in case pre-scan: {e}")
+            return None
+
     async def run_consultant(self, agent: Agent, query: str) -> Dict[str, Any]:
         """Run a single consultant agent and return its recommendations."""
         try:
@@ -207,6 +348,7 @@ Example response without recommendations:
     async def optimize_query(self, query: str, max_concurrent: int = 10) -> Dict[str, Any]:
         """
         Main method to optimize a query using all consultants and the executive.
+        SI-7 and SI-8 wait for web content while other consultants run immediately.
         
         Args:
             query: The Boolean query to optimize
@@ -215,26 +357,66 @@ Example response without recommendations:
         start_time = time.time()
         self._log(f"Starting optimization for query: '{query}'")
         
-        # Step 1: Run consultant agents with concurrency limit
-        self._log(f"Running {len(self.consultant_agents)} consultant agents with {self.model} (max {max_concurrent} concurrent)")
+        # Separate consultants into two groups
+        immediate_consultants = []
+        delayed_consultants = []  # SI-7 and SI-8
         
-        # Create a semaphore to limit concurrent requests
+        for agent in self.consultant_agents:
+            if agent.name in ["SI-7-Statute-Citation-to-Core-Concept-Expansion", 
+                             "SI-8-Case-Citation-to-Core-Concept-Expansion"]:
+                delayed_consultants.append(agent)
+            else:
+                immediate_consultants.append(agent)
+        
+        # Start pre-scan for SI-7/SI-8
+        pre_scan_task = asyncio.create_task(self._pre_scan_for_citations(query))
+        
+        # Step 1: IMMEDIATELY run all other consultants
+        self._log(f"Running {len(immediate_consultants)} consultants immediately with {self.model}")
         semaphore = asyncio.Semaphore(max_concurrent)
         
-        async def run_consultant_with_semaphore(agent):
+        async def run_consultant_with_semaphore(agent, enhanced_query=None):
             async with semaphore:
-                return await self.run_consultant(agent, query)
+                return await self.run_consultant(agent, enhanced_query or query)
         
-        consultant_results = await asyncio.gather(
-            *(run_consultant_with_semaphore(agent) for agent in self.consultant_agents)
+        # Run immediate consultants
+        immediate_results = await asyncio.gather(
+            *(run_consultant_with_semaphore(agent) for agent in immediate_consultants)
         )
         
-        # Step 2: Filter and format consultant recommendations
+        # Wait for pre-scan to complete
+        if delayed_consultants:
+            self._log("Waiting for pre-scan to complete for SI-7/SI-8")
+            enhanced_queries = await pre_scan_task
+        else:
+            enhanced_queries = {}
+        
+        # Step 2: Run delayed consultants (SI-7/SI-8) with enhanced content
+        delayed_results = []
+        if delayed_consultants:
+            self._log(f"Running {len(delayed_consultants)} delayed consultants with enhanced content")
+            delayed_tasks = []
+            for agent in delayed_consultants:
+                if agent.name == "SI-7-Statute-Citation-to-Core-Concept-Expansion":
+                    enhanced_query = enhanced_queries.get('statute_enhanced_query', query)
+                elif agent.name == "SI-8-Case-Citation-to-Core-Concept-Expansion":
+                    enhanced_query = enhanced_queries.get('case_enhanced_query', query)
+                else:
+                    enhanced_query = query
+                    
+                delayed_tasks.append(run_consultant_with_semaphore(agent, enhanced_query))
+            
+            delayed_results = await asyncio.gather(*delayed_tasks)
+        
+        # Combine all results
+        all_consultant_results = immediate_results + delayed_results
+        
+        # Step 3: Filter and format consultant recommendations
         active_recommendations = []
         consultant_summary = []
         all_structured_outputs = {}
         
-        for result in consultant_results:
+        for result in all_consultant_results:
             if result["has_recommendations"]:
                 active_recommendations.append(f"### {result['consultant']}\n{result['recommendations']}")
                 consultant_summary.append(result['consultant'])
@@ -243,18 +425,18 @@ Example response without recommendations:
             if result.get("structured_output"):
                 all_structured_outputs[result['consultant']] = result['structured_output']
         
-        self._log(f"Active consultants: {len(active_recommendations)}/{len(consultant_results)}")
+        self._log(f"Active consultants: {len(active_recommendations)}/{len(all_consultant_results)}")
         if consultant_summary:
             self._log(f"Consultants with recommendations: {', '.join(consultant_summary)}")
         
-        # Step 3: Prepare input for executive agent
+        # Step 4: Prepare input for executive agent
         executive_input = self._prepare_executive_input(query, active_recommendations)
         
-        # Step 4: Run executive agent to synthesize recommendations
+        # Step 5: Run executive agent to synthesize recommendations
         self._log(f"Running executive agent ({self.model}) to synthesize recommendations")
         executive_result = await Runner.run(self.executive_agent, executive_input)
         
-        # Step 5: Process structured executive output
+        # Step 6: Process structured executive output
         executive_output: ExecutiveOutput = executive_result.final_output
         
         execution_time = time.time() - start_time
@@ -263,7 +445,7 @@ Example response without recommendations:
         return {
             "original_query": query,
             "model_used": self.model,
-            "consultant_count": len(consultant_results),
+            "consultant_count": len(all_consultant_results),
             "active_consultants": len(active_recommendations),
             "execution_time": f"{execution_time:.2f} seconds",
             "optimized_queries": executive_output.model_dump(),
