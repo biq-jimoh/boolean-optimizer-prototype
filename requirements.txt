@@ -1,0 +1,14 @@
+# Bankruptcy Query Optimizer Requirements
+
+# Core dependency
+openai-agents>=0.2.0
+
+# Async support (if not already installed)
+asyncio>=3.4.3
+
+# Data validation
+pydantic>=2.0.0
+
+# Optional dependencies for development
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
