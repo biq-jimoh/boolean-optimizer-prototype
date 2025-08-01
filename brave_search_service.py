@@ -5,7 +5,7 @@ Handles statute and case law searches using the Brave Search API.
 
 import os
 from typing import List, Dict, Optional
-from brave import Brave, AsyncBrave
+import httpx
 import asyncio
 
 
@@ -23,8 +23,11 @@ class BraveSearchService:
         if not self.api_key:
             raise ValueError("Brave Search API key not found. Set BRAVE_SEARCH_API_KEY environment variable.")
         
-        # Initialize async client
-        self.client = AsyncBrave(api_key=self.api_key)
+        self.base_url = "https://api.search.brave.com/res/v1/web/search"
+        self.headers = {
+            "Accept": "application/json",
+            "X-Subscription-Token": self.api_key
+        }
     
     async def search_statute(self, citation: str, count: int = 5) -> List[Dict]:
         """
@@ -41,24 +44,34 @@ class BraveSearchService:
             # Format search query for law.cornell.edu
             search_query = f"site:law.cornell.edu {citation}"
             
+            params = {
+                "q": search_query,
+                "count": count,
+                "search_lang": "en",
+                "country": "US"
+            }
+            
             # Perform search
-            response = await self.client.search(
-                q=search_query,
-                count=count,
-                search_lang="en",
-                country="US"
-            )
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    self.base_url,
+                    headers=self.headers,
+                    params=params
+                )
+                response.raise_for_status()
             
             # Extract relevant results
+            data = response.json()
             results = []
-            if response.web_results:
-                for result in response.web_results:
-                    results.append({
-                        'title': result.title,
-                        'url': result.url,
-                        'description': result.description,
-                        'snippet': getattr(result, 'snippet', '')
-                    })
+            
+            web_results = data.get("web", {}).get("results", [])
+            for result in web_results:
+                results.append({
+                    'title': result.get('title', ''),
+                    'url': result.get('url', ''),
+                    'description': result.get('description', ''),
+                    'snippet': result.get('snippet', '')
+                })
             
             return results
             
@@ -81,24 +94,34 @@ class BraveSearchService:
             # Format search query for courtlistener.com
             search_query = f"site:courtlistener.com/opinion {case_info}"
             
+            params = {
+                "q": search_query,
+                "count": count,
+                "search_lang": "en",
+                "country": "US"
+            }
+            
             # Perform search
-            response = await self.client.search(
-                q=search_query,
-                count=count,
-                search_lang="en",
-                country="US"
-            )
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    self.base_url,
+                    headers=self.headers,
+                    params=params
+                )
+                response.raise_for_status()
             
             # Extract relevant results
+            data = response.json()
             results = []
-            if response.web_results:
-                for result in response.web_results:
-                    results.append({
-                        'title': result.title,
-                        'url': result.url,
-                        'description': result.description,
-                        'snippet': getattr(result, 'snippet', '')
-                    })
+            
+            web_results = data.get("web", {}).get("results", [])
+            for result in web_results:
+                results.append({
+                    'title': result.get('title', ''),
+                    'url': result.get('url', ''),
+                    'description': result.get('description', ''),
+                    'snippet': result.get('snippet', '')
+                })
             
             return results
             
@@ -108,5 +131,5 @@ class BraveSearchService:
     
     async def close(self):
         """Close the client session."""
-        # The brave-search library handles session management internally
+        # No cleanup needed with httpx.AsyncClient context manager
         pass

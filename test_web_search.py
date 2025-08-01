@@ -10,6 +10,9 @@ from bankruptcy_query_optimizer import BankruptcyQueryOptimizer
 # Load environment variables
 load_dotenv()
 
+# Set the Brave API key for testing
+os.environ["BRAVE_SEARCH_API_KEY"] = "BSA7CvTMM5stZ1YjkfLzQ-Un6y7JpbV"
+
 
 async def test_statute_query():
     """Test with a statute citation query."""
