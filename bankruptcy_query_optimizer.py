@@ -394,19 +394,36 @@ Example response without recommendations:
         # Step 2: Run delayed consultants (SI-7/SI-8) with enhanced content
         delayed_results = []
         if delayed_consultants:
-            self._log(f"Running {len(delayed_consultants)} delayed consultants with enhanced content")
+            # Only run consultants that have web content
             delayed_tasks = []
             for agent in delayed_consultants:
+                should_run = False
+                enhanced_query = query
+                
                 if agent.name == "SI-7-Statute-Citation-to-Core-Concept-Expansion":
-                    enhanced_query = enhanced_queries.get('statute_enhanced_query', query)
+                    if enhanced_queries.get('statute_enhanced_query'):
+                        enhanced_query = enhanced_queries['statute_enhanced_query']
+                        should_run = True
+                    else:
+                        self._log(f"Skipping {agent.name} - no statute content found")
                 elif agent.name == "SI-8-Case-Citation-to-Core-Concept-Expansion":
-                    enhanced_query = enhanced_queries.get('case_enhanced_query', query)
+                    if enhanced_queries.get('case_enhanced_query'):
+                        enhanced_query = enhanced_queries['case_enhanced_query']
+                        should_run = True
+                    else:
+                        self._log(f"Skipping {agent.name} - no case content found")
                 else:
-                    enhanced_query = query
-                    
-                delayed_tasks.append(run_consultant_with_semaphore(agent, enhanced_query))
+                    # Other delayed consultants (shouldn't happen, but just in case)
+                    should_run = True
+                
+                if should_run:
+                    delayed_tasks.append(run_consultant_with_semaphore(agent, enhanced_query))
             
-            delayed_results = await asyncio.gather(*delayed_tasks)
+            if delayed_tasks:
+                self._log(f"Running {len(delayed_tasks)} delayed consultants with enhanced content")
+                delayed_results = await asyncio.gather(*delayed_tasks)
+            else:
+                self._log("No delayed consultants to run (no web content found)")
         
         # Combine all results
         all_consultant_results = immediate_results + delayed_results
