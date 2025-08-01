@@ -20,6 +20,7 @@ from brave_search_service import BraveSearchService
 from content_validator import ContentValidator
 from content_extractor import ContentExtractor
 from url_cleaner import clean_courtlistener_url
+from token_budget import TokenBudgetManager
 
 
 # Structured output models for consultants
@@ -191,7 +192,7 @@ Example response without recommendations:
     
     async def _pre_scan_for_citations(self, query: str) -> Dict[str, str]:
         """
-        Pre-scans query for citations and fetches content.
+        Pre-scans query for all citations and fetches content with token budget management.
         Returns enhanced queries for SI-7 and SI-8.
         """
         enhanced_queries = {}
@@ -199,25 +200,147 @@ Example response without recommendations:
         if not self.brave_search:
             return enhanced_queries
         
-        # Check for statute citation
-        statute_task = asyncio.create_task(self._check_and_fetch_statute(query))
-        # Check for case citation  
-        case_task = asyncio.create_task(self._check_and_fetch_case(query))
+        # Detect ALL citations
+        statute_result = await self.citation_detector.detect_statutes(query)
+        case_result = await self.citation_detector.detect_cases(query)
         
-        # Wait for both checks to complete
-        statute_result, case_result = await asyncio.gather(
-            statute_task, case_task, return_exceptions=True
+        # Convert to dicts for budget allocation
+        statute_citations = [
+            {
+                'citation': c.citation,
+                'normalized': c.normalized,
+                'subsection': c.subsection
+            }
+            for c in statute_result.citations
+        ] if statute_result.found else []
+        
+        case_citations = [
+            {
+                'case_name': c.case_name,
+                'search_format': c.search_format
+            }
+            for c in case_result.citations
+        ] if case_result.found else []
+        
+        # Allocate token budget
+        budget_manager = TokenBudgetManager()
+        token_allocations = budget_manager.allocate_budget(
+            statute_citations,
+            case_citations
         )
         
-        if isinstance(statute_result, str) and statute_result:
-            enhanced_queries['statute_enhanced_query'] = statute_result
+        # Create all fetch tasks for maximum parallelism
+        fetch_tasks = []
         
-        if isinstance(case_result, str) and case_result:
-            enhanced_queries['case_enhanced_query'] = case_result
+        # Add statute fetch tasks
+        for citation in statute_citations:
+            budget_key = f"statute:{citation['citation']}"
+            max_tokens = token_allocations.get(budget_key, 50_000)
+            
+            task = asyncio.create_task(
+                self._fetch_single_statute(citation, max_tokens)
+            )
+            fetch_tasks.append(('statute', citation['citation'], task))
+        
+        # Add case fetch tasks
+        for citation in case_citations:
+            budget_key = f"case:{citation['case_name']}"
+            max_tokens = token_allocations.get(budget_key, 100_000)
+            
+            task = asyncio.create_task(
+                self._fetch_single_case(citation, max_tokens)
+            )
+            fetch_tasks.append(('case', citation['case_name'], task))
+        
+        # Wait for all fetches in parallel
+        if fetch_tasks:
+            results = await asyncio.gather(
+                *[task for _, _, task in fetch_tasks],
+                return_exceptions=True
+            )
+            
+            # Aggregate successful results
+            statute_contents = {}
+            case_contents = {}
+            
+            for i, (type, key, _) in enumerate(fetch_tasks):
+                if not isinstance(results[i], Exception) and results[i]:
+                    if type == 'statute':
+                        statute_contents[key] = results[i]
+                    else:
+                        case_contents[key] = results[i]
+            
+            # Build enhanced queries
+            if statute_contents:
+                enhanced_query = f"{query}\n\n--- FETCHED STATUTE TEXTS ---"
+                for citation, content in statute_contents.items():
+                    enhanced_query += f"\n\n[{citation}]\n{content}"
+                enhanced_queries['statute_enhanced_query'] = enhanced_query
+            
+            if case_contents:
+                enhanced_query = f"{query}\n\n--- FETCHED CASE OPINION TEXTS ---"
+                for case_name, content in case_contents.items():
+                    enhanced_query += f"\n\n[{case_name}]\n{content}"
+                enhanced_queries['case_enhanced_query'] = enhanced_query
             
         return enhanced_queries
     
-    async def _check_and_fetch_statute(self, query: str) -> Optional[str]:
+    async def _fetch_single_statute(self, citation_info: Dict[str, str], max_tokens: int) -> Optional[str]:
+        """
+        Fetches content for a single statute citation with token limit.
+        
+        Args:
+            citation_info: Dict with citation, normalized, subsection
+            max_tokens: Maximum tokens for this citation
+            
+        Returns:
+            Content string if successful, None otherwise
+        """
+        try:
+            self._log(f"Fetching statute: {citation_info['citation']} (max {max_tokens} tokens)")
+            
+            # Search on law.cornell.edu
+            search_results = await self.brave_search.search_statute(
+                citation_info['normalized']
+            )
+            
+            if not search_results:
+                self._log(f"No search results found for statute {citation_info['citation']}")
+                return None
+                
+            # Extract content with token limit
+            self._log(f"Fetching content from: {search_results[0]['url']}")
+            content = await self.content_extractor.extract_statute_text(
+                search_results[0]['url'],
+                citation_info.get('subsection'),
+                max_tokens=max_tokens
+            )
+            
+            if not content or len(content.strip()) < 100:
+                self._log("Failed to extract meaningful content from page")
+                return None
+            
+            # Validate with actual content
+            validation = await self.content_validator.validate_statute_result(
+                citation_info,
+                search_results[0],
+                content
+            )
+            
+            if not validation.is_valid:
+                self._log(f"Validation failed: {validation.reason}")
+                return None
+                
+            self._log(f"Valid statute page found: {search_results[0]['url']}")
+            
+            # Return just the content
+            return content
+            
+        except Exception as e:
+            self._log(f"Error fetching statute {citation_info['citation']}: {e}")
+            return None
+    
+    async def _legacy_check_and_fetch_statute(self, query: str) -> Optional[str]:
         """
         Detects statute citation and fetches content from law.cornell.edu
         """
@@ -269,7 +392,65 @@ Example response without recommendations:
             self._log(f"Error in statute pre-scan: {e}")
             return None
     
-    async def _check_and_fetch_case(self, query: str) -> Optional[str]:
+    async def _fetch_single_case(self, case_info: Dict[str, str], max_tokens: int) -> Optional[str]:
+        """
+        Fetches content for a single case citation with token limit.
+        
+        Args:
+            case_info: Dict with case_name, search_format
+            max_tokens: Maximum tokens for this citation
+            
+        Returns:
+            Content string if successful, None otherwise
+        """
+        try:
+            self._log(f"Fetching case: {case_info['case_name']} (max {max_tokens} tokens)")
+            
+            # Search on courtlistener.com
+            search_results = await self.brave_search.search_case(
+                case_info['search_format']
+            )
+            
+            if not search_results:
+                self._log(f"No search results found for case {case_info['case_name']}")
+                return None
+            
+            # Clean CourtListener URL to ensure we get the main opinion page
+            cleaned_url = clean_courtlistener_url(search_results[0]['url'])
+            self._log(f"Cleaned URL: {cleaned_url}")
+            
+            # Extract content with token limit
+            self._log(f"Fetching content from: {cleaned_url}")
+            content = await self.content_extractor.extract_case_text(
+                cleaned_url,
+                max_tokens=max_tokens
+            )
+            
+            if not content or len(content.strip()) < 100:
+                self._log("Failed to extract meaningful content from page")
+                return None
+            
+            # Validate with actual content
+            validation = await self.content_validator.validate_case_result(
+                case_info,
+                search_results[0],
+                content
+            )
+            
+            if not validation.is_valid:
+                self._log(f"Validation failed: {validation.reason}")
+                return None
+                
+            self._log(f"Valid case opinion found: {cleaned_url}")
+            
+            # Return just the content
+            return content
+            
+        except Exception as e:
+            self._log(f"Error fetching case {case_info['case_name']}: {e}")
+            return None
+    
+    async def _legacy_check_and_fetch_case(self, query: str) -> Optional[str]:
         """
         Detects case citation and fetches content from courtlistener.com
         """

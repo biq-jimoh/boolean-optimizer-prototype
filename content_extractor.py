@@ -8,6 +8,7 @@ import httpx
 import random
 import asyncio
 from urllib.parse import urlparse
+from token_budget import TokenBudgetConfig
 
 # Try to import Playwright, but don't fail if it's not available
 try:
@@ -23,6 +24,7 @@ class ContentExtractor:
     
     def __init__(self, timeout: int = 30):
         self.timeout = timeout
+        self.token_config = TokenBudgetConfig()
         
         # Full set of Chrome headers in the order a real browser sends them
         self.base_headers = {
@@ -59,6 +61,26 @@ class ContentExtractor:
         """Add a random delay to mimic human behavior."""
         delay = random.uniform(0.5, 2.0)
         await asyncio.sleep(delay)
+    
+    def truncate_to_token_limit(self, content: str, max_tokens: int) -> str:
+        """
+        Simple truncation to fit within token limit.
+        
+        Args:
+            content: The content to truncate
+            max_tokens: Maximum number of tokens allowed
+            
+        Returns:
+            Truncated content that fits within token limit
+        """
+        estimated_tokens = self.token_config.estimate_tokens(content)
+        
+        if estimated_tokens <= max_tokens:
+            return content
+        
+        # Simple character-based truncation
+        max_chars = max_tokens * 4  # 1 token ≈ 4 chars
+        return content[:max_chars] + "\n<!-- Content truncated due to token limit -->"
     
     async def _fetch_with_httpx(self, url: str) -> tuple[str, bool]:
         """
@@ -143,16 +165,17 @@ class ContentExtractor:
             print(f"Error with Playwright fetch from {url}: {e}")
             return f"Error with Playwright: {str(e)}", False
     
-    async def extract_statute_text(self, url: str, subsection: Optional[str] = None) -> str:
+    async def extract_statute_text(self, url: str, subsection: Optional[str] = None, max_tokens: Optional[int] = None) -> str:
         """
-        Fetch the raw HTML content from a statute page.
+        Fetch the raw HTML content from a statute page with optional token limit.
         
         Args:
             url: URL of the statute page
             subsection: Subsection if specified (we'll let the validator handle this)
+            max_tokens: Maximum tokens to return (optional)
             
         Returns:
-            Raw HTML content
+            Raw HTML content, possibly truncated to fit token limit
         """
         # Try httpx first
         content, success = await self._fetch_with_httpx(url)
@@ -162,17 +185,22 @@ class ContentExtractor:
             print(f"WAF challenge for statute {url}, trying Playwright...")
             content, success = await self._fetch_with_playwright(url)
         
+        # Apply token limit if specified
+        if max_tokens and success:
+            content = self.truncate_to_token_limit(content, max_tokens)
+        
         return content
     
-    async def extract_case_text(self, url: str) -> str:
+    async def extract_case_text(self, url: str, max_tokens: Optional[int] = None) -> str:
         """
-        Fetch the raw HTML content from a case opinion page.
+        Fetch the raw HTML content from a case opinion page with optional token limit.
         
         Args:
             url: URL of the case opinion page
+            max_tokens: Maximum tokens to return (optional)
             
         Returns:
-            Raw HTML content
+            Raw HTML content, possibly truncated to fit token limit
         """
         # Try httpx first
         content, success = await self._fetch_with_httpx(url)
@@ -181,5 +209,9 @@ class ContentExtractor:
         if not success and content == "WAF_CHALLENGE":
             print(f"WAF challenge for case {url}, trying Playwright...")
             content, success = await self._fetch_with_playwright(url)
+        
+        # Apply token limit if specified
+        if max_tokens and success:
+            content = self.truncate_to_token_limit(content, max_tokens)
         
         return content

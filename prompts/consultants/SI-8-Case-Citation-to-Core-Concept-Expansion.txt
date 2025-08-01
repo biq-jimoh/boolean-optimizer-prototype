@@ -97,13 +97,17 @@ Only expand cases that:
 <note>This is a BROADENING suggestion - apply only when the goal is to broaden the search</note>
 
 Your task:
-1. Identify if the query is primarily focused on a landmark bankruptcy case
-2. Use your knowledge of bankruptcy case law to identify distinctive concepts
-3. Extract distinctive concepts, tests, or terminology associated with the case
-4. Only expand well-known landmark cases
-5. Return recommendations in the format:
+1. Identify if the query contains landmark bankruptcy case citations
+2. If case opinion text is provided (marked with "FETCHED CASE OPINION TEXTS"), extract salient concepts for EACH case
+3. Extract distinctive concepts, tests, or terminology associated with each case
+4. Only expand cases for which opinion text is provided
+5. For multiple cases, provide separate recommendations for each
+
+Return recommendations in the format:
 
 Update the query so that:
-- [original case query] is expanded to [expanded query with concepts] (adding distinctive concepts from [case name])
+- [original case name] is expanded to [expanded query with concepts] (adding distinctive concepts from [case name])
 
-If the query is not primarily case-focused or not a landmark case, respond with: "Query is not primarily focused on a landmark bankruptcy case."
+If multiple case opinion texts are provided, make separate recommendations for each case found in the provided texts.
+
+If the query is not primarily case-focused or no case opinion text is provided, respond with: "Query is not primarily focused on a landmark bankruptcy case."

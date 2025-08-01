@@ -144,14 +144,18 @@ Note: Multi-word phrases ALWAYS need parentheses: (word1 /3 word2)
 <note>This is a BROADENING suggestion - apply only when the goal is to broaden the search</note>
 
 Your task:
-1. Identify if the query is primarily focused on a statute citation
-2. Use your knowledge of bankruptcy statutes to identify distinctive concepts
+1. Identify if the query contains statute citations
+2. If statute text is provided (marked with "FETCHED STATUTE TEXTS"), extract salient concepts for EACH citation
 3. Extract ONLY salient keywords/phrases specific to the exact provision/subsection cited - every term must be distinctive
 4. Apply appropriate proximity patterns based on whether terms are common or specific
 5. ALWAYS wrap multi-word proximity expressions in parentheses: (word1 /3 word2)
-6. Return recommendations in the format:
+6. For multiple citations, provide separate recommendations for each
+
+Return recommendations in the format:
 
 Update the query so that:
-- [original statute query] is expanded to [expanded query with concepts] (adding distinctive concepts from [specific provision])
+- [original statute citation] is expanded to [expanded query with concepts] (adding distinctive concepts from [specific provision])
 
-If the query is not primarily statute-focused, respond with: "Query is not primarily statute citation-focused."
+If multiple statute texts are provided, make separate recommendations for each citation found in the provided texts.
+
+If the query is not primarily statute-focused or no statute text is provided, respond with: "Query is not primarily statute citation-focused."
