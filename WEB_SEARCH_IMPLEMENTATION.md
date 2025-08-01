@@ -46,8 +46,16 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
    - Search the appropriate legal database
    - Validate the first result using LLM
    - Extract the relevant content from the page
-4. **Enhanced Execution**: SI-7 and SI-8 receive the original query plus the fetched legal text
-5. **Normal Flow**: Results from all consultants are combined and sent to the executive agent
+4. **Enhanced Execution**: 
+   - If web content is found: SI-7 and SI-8 receive the original query plus the fetched legal text
+   - If no web content found: SI-7 and SI-8 are skipped entirely
+5. **Normal Flow**: Results from all consultants that ran are combined and sent to the executive agent
+
+### Important Behavior
+
+- SI-7 and SI-8 **only** make recommendations based on actual legal text from web searches
+- They are **skipped entirely** if web search fails or returns no valid results
+- They **never** use their built-in knowledge to make recommendations
 
 ## Configuration
 
