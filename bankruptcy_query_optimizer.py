@@ -19,6 +19,7 @@ from citation_detector import CitationDetector
 from brave_search_service import BraveSearchService
 from content_validator import ContentValidator
 from content_extractor import ContentExtractor
+from url_cleaner import clean_courtlistener_url
 
 
 # Structured output models for consultants
@@ -289,7 +290,17 @@ Example response without recommendations:
                 self._log("No search results found for case")
                 return None
                 
-            # 3. Extract content first to validate with actual page content
+            # 3. Clean the URL to ensure we get the main opinion page
+            original_url = search_results[0]['url']
+            cleaned_url = clean_courtlistener_url(original_url)
+            
+            if original_url != cleaned_url:
+                self._log(f"Cleaned URL from: {original_url}")
+                self._log(f"Cleaned URL to: {cleaned_url}")
+                # Update the search result with cleaned URL
+                search_results[0]['url'] = cleaned_url
+            
+            # 4. Extract content first to validate with actual page content
             self._log(f"Fetching content from: {search_results[0]['url']}")
             content = await self.content_extractor.extract_case_text(
                 search_results[0]['url']

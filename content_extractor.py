@@ -1,5 +1,5 @@
 """
-Content Extraction Module - Simplified Version
+Content Extraction Module - Simplified Version with Error Handling
 Just fetches raw HTML for the validator to analyze.
 """
 
@@ -37,6 +37,10 @@ class ContentExtractor:
                 )
                 response.raise_for_status()
             
+            # Check for WAF challenges
+            if response.status_code == 202 and response.headers.get('x-amzn-waf-action') == 'challenge':
+                return "Error: WAF challenge detected. The website is blocking automated requests."
+            
             return response.text
             
         except Exception as e:
@@ -61,6 +65,11 @@ class ContentExtractor:
                     timeout=self.timeout,
                     follow_redirects=True
                 )
+                
+                # Check for WAF challenges
+                if response.status_code == 202 and response.headers.get('x-amzn-waf-action') == 'challenge':
+                    return "Error: WAF challenge detected. CourtListener is blocking automated requests."
+                
                 response.raise_for_status()
             
             return response.text
