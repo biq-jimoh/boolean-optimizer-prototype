@@ -1,20 +1,147 @@
 """
-Content Extraction Module - Simplified Version with Error Handling
-Just fetches raw HTML for the validator to analyze.
+Content Extraction Module - Enhanced Browser-like Version
+Uses browser-like headers, HTTP/2, delays, and Playwright fallback for WAF bypass.
 """
 
 from typing import Optional
 import httpx
+import random
+import asyncio
+from urllib.parse import urlparse
+
+# Try to import Playwright, but don't fail if it's not available
+try:
+    from playwright.async_api import async_playwright
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+    print("Note: Playwright not available. Install with 'pip install playwright && playwright install chromium' for better WAF bypass.")
 
 
 class ContentExtractor:
-    """Fetches web pages for validation."""
+    """Fetches web pages with browser-like behavior for validation."""
     
     def __init__(self, timeout: int = 30):
         self.timeout = timeout
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (compatible; BankruptcyQueryOptimizer/1.0)'
+        
+        # Full set of Chrome headers in the order a real browser sends them
+        self.base_headers = {
+            'Connection': 'keep-alive',
+            'Cache-Control': 'max-age=0',
+            'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"macOS"',
+            'Upgrade-Insecure-Requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-User': '?1',
+            'Sec-Fetch-Dest': 'document',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9',
         }
+    
+    def _get_headers_for_url(self, url: str) -> dict:
+        """Get headers with proper Host header for the URL."""
+        parsed = urlparse(url)
+        headers = self.base_headers.copy()
+        headers['Host'] = parsed.netloc
+        
+        # Adjust headers for specific sites
+        if 'courtlistener.com' in url:
+            headers['Referer'] = 'https://www.google.com/'
+            headers['Sec-Fetch-Site'] = 'cross-site'
+        
+        return headers
+    
+    async def _random_delay(self):
+        """Add a random delay to mimic human behavior."""
+        delay = random.uniform(0.5, 2.0)
+        await asyncio.sleep(delay)
+    
+    async def _fetch_with_httpx(self, url: str) -> tuple[str, bool]:
+        """
+        Primary method: Fetch with enhanced httpx settings.
+        
+        Returns:
+            Tuple of (content, success_bool)
+        """
+        try:
+            # Add random delay to mimic human browsing
+            await self._random_delay()
+            
+            headers = self._get_headers_for_url(url)
+            
+            async with httpx.AsyncClient(
+                http2=True,  # Use HTTP/2 like modern browsers
+                follow_redirects=True,
+                verify=True,  # Verify SSL certificates
+            ) as client:
+                response = await client.get(
+                    url, 
+                    headers=headers,
+                    timeout=self.timeout,
+                )
+                
+                # Check for WAF challenges
+                if response.status_code == 202 and response.headers.get('x-amzn-waf-action') == 'challenge':
+                    print(f"WAF challenge detected for {url}")
+                    return "WAF_CHALLENGE", False
+                
+                response.raise_for_status()
+                print(f"Successfully fetched {url} with httpx (status: {response.status_code})")
+                return response.text, True
+                
+        except Exception as e:
+            print(f"Error with httpx fetch from {url}: {e}")
+            return f"Error: {str(e)}", False
+    
+    async def _fetch_with_playwright(self, url: str) -> tuple[str, bool]:
+        """
+        Fallback method: Fetch using real browser automation.
+        
+        Returns:
+            Tuple of (content, success_bool)
+        """
+        if not PLAYWRIGHT_AVAILABLE:
+            return "Error: Playwright not available for fallback", False
+        
+        try:
+            print(f"Attempting Playwright fetch for {url}")
+            
+            async with async_playwright() as p:
+                # Launch browser in headless mode
+                browser = await p.chromium.launch(
+                    headless=True,
+                    args=['--disable-blink-features=AutomationControlled']
+                )
+                
+                # Create new page with browser context
+                context = await browser.new_context(
+                    viewport={'width': 1920, 'height': 1080},
+                    user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                )
+                
+                page = await context.new_page()
+                
+                # Navigate to the URL
+                await page.goto(url, wait_until='domcontentloaded', timeout=30000)
+                
+                # Wait a bit for any dynamic content
+                await page.wait_for_timeout(1000)
+                
+                # Get the page content
+                content = await page.content()
+                
+                await browser.close()
+                
+                print(f"Successfully fetched {url} with Playwright")
+                return content, True
+                
+        except Exception as e:
+            print(f"Error with Playwright fetch from {url}: {e}")
+            return f"Error with Playwright: {str(e)}", False
     
     async def extract_statute_text(self, url: str, subsection: Optional[str] = None) -> str:
         """
@@ -27,25 +154,15 @@ class ContentExtractor:
         Returns:
             Raw HTML content
         """
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    url, 
-                    headers=self.headers,
-                    timeout=self.timeout,
-                    follow_redirects=True
-                )
-                response.raise_for_status()
-            
-            # Check for WAF challenges
-            if response.status_code == 202 and response.headers.get('x-amzn-waf-action') == 'challenge':
-                return "Error: WAF challenge detected. The website is blocking automated requests."
-            
-            return response.text
-            
-        except Exception as e:
-            print(f"Error fetching statute from {url}: {e}")
-            return f"Error fetching content: {str(e)}"
+        # Try httpx first
+        content, success = await self._fetch_with_httpx(url)
+        
+        # If WAF challenge detected, try Playwright
+        if not success and content == "WAF_CHALLENGE":
+            print(f"WAF challenge for statute {url}, trying Playwright...")
+            content, success = await self._fetch_with_playwright(url)
+        
+        return content
     
     async def extract_case_text(self, url: str) -> str:
         """
@@ -57,23 +174,12 @@ class ContentExtractor:
         Returns:
             Raw HTML content
         """
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    url,
-                    headers=self.headers,
-                    timeout=self.timeout,
-                    follow_redirects=True
-                )
-                
-                # Check for WAF challenges
-                if response.status_code == 202 and response.headers.get('x-amzn-waf-action') == 'challenge':
-                    return "Error: WAF challenge detected. CourtListener is blocking automated requests."
-                
-                response.raise_for_status()
-            
-            return response.text
-            
-        except Exception as e:
-            print(f"Error fetching case from {url}: {e}")
-            return f"Error fetching content: {str(e)}"
+        # Try httpx first
+        content, success = await self._fetch_with_httpx(url)
+        
+        # If WAF challenge detected, try Playwright
+        if not success and content == "WAF_CHALLENGE":
+            print(f"WAF challenge for case {url}, trying Playwright...")
+            content, success = await self._fetch_with_playwright(url)
+        
+        return content
