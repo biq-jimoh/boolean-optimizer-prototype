@@ -353,6 +353,11 @@ Example response without recommendations:
             
             self._log(f"Consultant {agent.name} completed with {len(output.recommendations)} recommendations")
             
+            # Log the actual recommendations if any
+            if output.has_recommendations and output.recommendations:
+                for rec in output.recommendations:
+                    self._log(f"  → {rec.original} ➔ {rec.replacement} (Reason: {rec.reason})")
+            
             return {
                 "consultant": agent.name,
                 "recommendations": formatted_recommendations,
