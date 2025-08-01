@@ -137,12 +137,12 @@ Is this the correct statute page?"""
                 reason=f"Validation error: {str(e)}"
             )
     
-    async def validate_case_result(self, case_name: str, search_result: Dict, page_content: str = None) -> ValidationOutput:
+    async def validate_case_result(self, case_info: Dict[str, str], search_result: Dict, page_content: str = None) -> ValidationOutput:
         """
         Validate that a search result contains the correct case.
         
         Args:
-            case_name: The case name being searched for
+            case_info: Dict with 'case_name' and 'search_format'
             search_result: Search result dict with title, url, description
             page_content: The raw HTML content of the page
             
@@ -152,29 +152,38 @@ Is this the correct statute page?"""
         try:
             if page_content and not page_content.startswith("Error"):
                 # Use full HTML for validation
-                prompt = f"""Validate this HTML page for case: {case_name}
+                prompt = f"""Validate this page for a case citation.
 
 URL: {search_result.get('url', '')}
 
 FULL HTML CONTENT:
 {page_content}
 
-Does this page contain the full opinion for the cited case {case_name}?
+User searched for: "{case_info['case_name']}"
+Search was formatted as: "{case_info.get('search_format', case_info['case_name'])}"
 
-Important: 
+Please verify:
+1. Is this the correct case opinion for {case_info['case_name']}?
+2. Does this page contain the actual judicial opinion (not just citations or authorities)?
+
+Important details:
 - Look for the actual judicial opinion with analysis and decision
 - Check if this is the main opinion page, not /authorities/ or /citations/
 - The HTML should contain judge names, court analysis, legal reasoning
 - Verify this is from courtlistener.com/opinion
 
-Return true only if this contains the actual court opinion."""
+If the search format includes court/year info (e.g., "U.S. Supreme Court, 2011"), 
+verify this matches the case on the page.
+
+Return true only if this contains the actual court opinion for the searched case."""
             else:
                 # Fallback to metadata validation
-                prompt = f"""Validate this search result for case: {case_name}
+                prompt = f"""Validate this search result for case: {case_info.get('case_name', '')}
 
 Title: {search_result.get('title', '')}
 URL: {search_result.get('url', '')}
 Description: {search_result.get('description', '')}
+Search format: {case_info.get('search_format', '')}
 
 Is this the correct case opinion?"""
             

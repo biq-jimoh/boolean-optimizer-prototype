@@ -312,7 +312,7 @@ Example response without recommendations:
             
             # 4. Validate with actual content
             validation = await self.content_validator.validate_case_result(
-                case_info['case_name'], 
+                case_info,  # Pass full case info dict
                 search_results[0],
                 content  # Pass the actual page content
             )
