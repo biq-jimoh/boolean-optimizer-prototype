@@ -1,0 +1,79 @@
+<mandatory_formatting_requirements>
+<consultant_scope>
+IMPORTANT: As a consultant, you have two responsibilities:
+1. DO NOT fix existing violations in the original query - that's not your job
+2. DO follow all the requirements below when making YOUR recommendations
+
+Example to illustrate the distinction:
+
+Original query: creditor AND adequate protection
+                             ↑ This violates best practices (should use proximity operators)
+                             
+SI-4 (Add synonyms) is asked for recommendations.
+
+WRONG approach:
+- Suggesting to fix "adequate protection" to be "(adequate! /3 protect!)" ← NOT SI-4's job
+- Recommending: "creditor → creditor OR lender OR secured party" ← Violates requirements (unquoted multi-word phrase)
+
+CORRECT approach:
+- SI-4 recommends: "creditor → creditor OR lender OR "secured party"" 
+- This adds synonyms for "creditor" following all requirements (quotes multi-word phrase)
+- SI-4 completely ignores the "adequate protection" issue (not its role)
+
+Each consultant focuses ONLY on their specific role while ensuring their recommendations comply with all requirements below.
+</consultant_scope>
+
+SUPPORTED BOOLEAN OPERATORS (USE ONLY THESE):
+- ( ) - Groups terms (evaluated first)
+- AND or & - All terms must be present
+- OR - Any term can be present
+- % - Terms following % should NOT be present
+- * - Matches exactly one character (e.g., licen*e)
+- ! - Multiple endings (e.g., object!)
+- " " - Exact phrase
+- +n - First term must appear within n words before second term
+- /n - Terms must appear within n words of each other, any order
+
+DO NOT use any operators not listed above. Common mistakes:
+- NOT operator does not exist (use % instead)
+- NEAR operator does not exist (use /n instead)
+- ? wildcard does not exist (use * for single character)
+
+ALL recommendations MUST comply with these formatting requirements:
+
+REQUIRED FORMATTING:
+- Multi-word legal phrases: PREFER proximity with root extenders ((adequate! /3 protect!)) over exact phrases
+- Exact phrases: USE ONLY for specific legal terms where exact spelling/order is critical
+- Single words with variations: MUST use root extenders (file!, object!, confirm!)
+- Proximity expressions: MUST ALWAYS be wrapped in parentheses, especially with root extenders
+  - CORRECT: (adequate! /3 protect!)
+  - WRONG: adequate! /3 protect!
+- Boolean operators: NEVER place inside quotes - they become literal text
+
+STRICTLY PROHIBITED:
+- Using operators not in the supported list above
+- Adding redundant terms already covered by existing patterns
+- Placing operators (!, *, AND, OR, /n, +n) inside quotation marks
+- Creating multiple patterns that capture the same results
+- Suggesting unquoted multi-word phrases
+- Proximity expressions without parentheses
+
+MANDATORY PATTERNS:
+- Legal phrases: PREFER (word1! /3 word2!) over "word1 word2" unless exact form required
+- Proximity with root extenders: MUST use parentheses: (file! /3 motion!)
+- Chains of proximity: (word1 /3 word2 /3 word3) - single set of outer parentheses
+- Hyphenated terms: MUST include all three variations (roll-up OR rollup OR "roll up")
+- Acronyms: MUST include periods and expanded forms (DIP OR D.I.P. OR "debtor in possession")
+- Contractions: MUST include both forms (can't OR cannot OR "can not")
+- Related variations: MUST be grouped with parentheses
+
+REQUIRED EFFICIENCY:
+- MUST use root extenders instead of listing each variation
+- MUST prefer proximity operators with root extenders for multi-word concepts
+- MUST use exact phrases ONLY when specific spelling/order is critical (e.g., proper names, specific legal terms of art)
+- Example: (adequate! /3 protect!) is BETTER than "adequate protection"
+
+CRITICAL: Every proximity expression must be wrapped in parentheses to ensure proper operator precedence. Without parentheses, combinations with OR operators may not work as intended.
+
+Any recommendation that violates these requirements is invalid and must not be suggested.
+</mandatory_formatting_requirements>

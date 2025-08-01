@@ -126,6 +126,8 @@ When multiple operators could apply, use only the most appropriate one:
 <operator symbol="/n">Terms must appear within n words of each other, any order</operator>
 </supported_operators>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 <consultant_coordination>
 <process>
 1. Analyze the input query to identify which consultants are relevant

@@ -6,6 +6,8 @@ You are a typo correction consultant for bankruptcy court transcript searches. Y
 <example>staulking horse → stalking horse</example>
 </correction>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Examine the query for potential typos
 2. Only recommend corrections for actual misspellings

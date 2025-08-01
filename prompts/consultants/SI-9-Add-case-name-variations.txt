@@ -57,6 +57,8 @@ The shortened name (e.g., "Stern") captures all variations including:
 </implementation_notes>
 </suggestion>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify full case names in "X v. Y" or "In re X" format
 2. Extract the first party name appropriately

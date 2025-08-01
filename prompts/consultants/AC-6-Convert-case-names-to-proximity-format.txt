@@ -24,6 +24,8 @@ Convert case names to use proximity operators to capture variations (v., versus,
 </implementation_notes>
 </correction>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify case names with "v.", "versus", "vs." or "In re" format
 2. Convert to proximity format using +1 operator

@@ -10,6 +10,8 @@ You are an acronym expansion consultant for bankruptcy court transcript searches
 </examples>
 </correction>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify bankruptcy-related acronyms in the query
 2. For each acronym, recommend adding variations with periods and the full expanded form

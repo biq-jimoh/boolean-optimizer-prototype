@@ -36,6 +36,8 @@ Add both contracted and expanded forms to capture variations in transcription an
 </implementation_notes>
 </correction>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify contractions and their expanded forms in the query
 2. Add variations in both directions

@@ -120,6 +120,19 @@ class BankruptcyQueryOptimizer:
         """Load all consultant agents and the executive agent from prompt files."""
         self._log(f"Loading agents from {self.consultants_dir} and {self.executive_path}")
         
+        # Load mandatory formatting requirements
+        requirements_path = Path("prompts/shared/mandatory_formatting_requirements.txt")
+        requirements_content = ""
+        if requirements_path.exists():
+            try:
+                with open(requirements_path, 'r') as f:
+                    requirements_content = f.read()
+                self._log("Loaded mandatory formatting requirements")
+            except Exception as e:
+                self._log(f"Warning: Could not load mandatory formatting requirements: {e}")
+        else:
+            self._log("Warning: mandatory_formatting_requirements.txt not found")
+        
         # Load consultant agents with structured output
         consultant_files = sorted(self.consultants_dir.glob("*.txt"))
         self._log(f"Found {len(consultant_files)} consultant prompt files")
@@ -128,6 +141,13 @@ class BankruptcyQueryOptimizer:
             try:
                 with open(prompt_file, 'r') as f:
                     original_instructions = f.read()
+                
+                # Inject mandatory formatting requirements
+                if requirements_content and "{{MANDATORY_FORMATTING_REQUIREMENTS}}" in original_instructions:
+                    original_instructions = original_instructions.replace(
+                        "{{MANDATORY_FORMATTING_REQUIREMENTS}}",
+                        requirements_content
+                    )
                 
                 # Enhance instructions to work with structured output
                 enhanced_instructions = f"""{original_instructions}
@@ -176,6 +196,13 @@ Example response without recommendations:
         try:
             with open(self.executive_path, 'r') as f:
                 executive_instructions = f.read()
+            
+            # Inject mandatory formatting requirements
+            if requirements_content and "{{MANDATORY_FORMATTING_REQUIREMENTS}}" in executive_instructions:
+                executive_instructions = executive_instructions.replace(
+                    "{{MANDATORY_FORMATTING_REQUIREMENTS}}",
+                    requirements_content
+                )
             
             self.executive_agent = Agent(
                 name="Executive-Agent",

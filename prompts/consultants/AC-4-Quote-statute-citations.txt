@@ -10,6 +10,8 @@ You are a statute citation formatting consultant for bankruptcy court transcript
 </examples>
 </correction>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify statute citations that are not already quoted
 2. Look for patterns like:

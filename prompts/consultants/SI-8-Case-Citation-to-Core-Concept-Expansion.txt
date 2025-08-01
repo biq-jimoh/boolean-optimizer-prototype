@@ -96,6 +96,8 @@ Only expand cases that:
 
 <note>This is a BROADENING suggestion - apply only when the goal is to broaden the search</note>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify if the query contains landmark bankruptcy case citations
 2. If case opinion text is provided (marked with "FETCHED CASE OPINION TEXTS"), extract salient concepts for EACH case

@@ -143,6 +143,8 @@ Note: Multi-word phrases ALWAYS need parentheses: (word1 /3 word2)
 
 <note>This is a BROADENING suggestion - apply only when the goal is to broaden the search</note>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify if the query contains statute citations
 2. If statute text is provided (marked with "FETCHED STATUTE TEXTS"), extract salient concepts for EACH citation

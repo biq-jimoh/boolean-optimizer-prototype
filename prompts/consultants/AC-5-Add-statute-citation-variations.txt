@@ -10,6 +10,8 @@ You are a statute citation variations consultant for bankruptcy court transcript
 </examples>
 </correction>
 
+{{MANDATORY_FORMATTING_REQUIREMENTS}}
+
 Your task:
 1. Identify statute citations in any format (with "section", "§", or standalone numbers)
 2. For each citation, recommend a comprehensive pattern that captures:
