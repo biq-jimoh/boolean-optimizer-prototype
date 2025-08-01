@@ -78,6 +78,10 @@ Run the test script to verify the implementation:
 python test_web_search.py
 ```
 
+**Note**: The test script includes a Brave API key for demonstration purposes. For production use, you should:
+1. Remove the hardcoded API key from `test_web_search.py`
+2. Set your own API key in the environment or a `.env` file
+
 The test script includes:
 - Statute citation query test
 - Case citation query test  
