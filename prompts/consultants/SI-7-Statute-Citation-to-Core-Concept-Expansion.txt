@@ -20,9 +20,33 @@ Never use the parent section's core concept as a keyword for subsections.
 - Extract keywords ONLY from the actual statute text provided
 - If no statute text is provided, respond with no recommendations
 - For multi-word phrases, use proximity operators with parentheses instead of quotes
-- Standard format: (word1 /3 word2) or (word1 /3 word2 /3 word3)
+- ALWAYS wrap proximity expressions in parentheses: (word1 /3 word2)
+- For chains: (word1 /3 word2 /3 word3) - single set of outer parentheses
 - Always use /3 for proximity between words in a phrase
+- This ensures proper operator precedence when combined with OR
 </critical_requirements>
+
+<parentheses_usage>
+<principle>Every proximity expression must be wrapped in parentheses</principle>
+<examples>
+CORRECT:
+- (cash /3 collateral)
+- (ordinary /3 course)
+- (personally /3 identifiable /3 information)
+- (lack /3 adequate! /3 protect!)
+- (federal /3 trade /3 commission)
+
+INCORRECT:
+- cash /3 collateral  (missing parentheses)
+- ordinary /3 course  (missing parentheses)
+- (personally /3 identifiable) /3 information  (incorrect nesting)
+</examples>
+<reason>
+Parentheses ensure the proximity expression is evaluated as a unit before combining with OR operators.
+Without them: cash /3 collateral OR deposits could parse as: cash /3 (collateral OR deposits)
+With them: (cash /3 collateral) OR deposits correctly finds "cash collateral" or "deposits"
+</reason>
+</parentheses_usage>
 
 <keyword_approaches>
 <approach_1>
@@ -35,9 +59,11 @@ Never use the parent section's core concept as a keyword for subsections.
 </examples>
 <proximity_patterns>
 Example for 365(b)(1)(A):
-- Section level: (365 OR ((section OR §) +0 365)) /50 cure
-- Subsection level: (((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b)) /50 cure
-- Paragraph level: (((section OR §) +0 ("365(b)(1)" OR "365b1")) OR ("365(b)(1)" OR "365b1")) /50 cure
+- Section level with single word: (365 OR ((section OR §) +0 365)) /50 cure
+- Section level with multi-word: (365 OR ((section OR §) +0 365)) /50 (cure /3 amount!)
+- Subsection level: (((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b)) /50 (adequate! /3 assur!)
+- Paragraph level: (((section OR §) +0 ("365(b)(1)" OR "365b1")) OR ("365(b)(1)" OR "365b1")) /50 (cure /3 default)
+Note: Multi-word phrases ALWAYS need parentheses: (word1 /3 word2)
 </proximity_patterns>
 </approach_1>
 
@@ -91,6 +117,8 @@ Example for 365(b)(1)(A):
   (((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b)) OR (365 /50 (cure OR default)) OR (cure! /3 amount!) OR (adequate! /3 assur!)
 - ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d) → 
   (((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)) OR (362 /50 relief) OR cause OR (equity /3 cushion) OR (lack /3 adequate! /3 protect!)
+- ((section OR §) +0 ("363(b)" OR 363b)) OR ("363(b)" OR 363b) → 
+  (((section OR §) +0 ("363(b)" OR 363b)) OR ("363(b)" OR 363b)) OR (363 /50 ((personally /3 identifiable /3 information) OR (consumer /3 privacy /3 ombudsman) OR (federal /3 trade /3 commission)))
 </query_examples>
 </suggestion>
 
@@ -101,7 +129,8 @@ Your task:
 2. Use your knowledge of bankruptcy statutes to identify distinctive concepts
 3. Extract distinctive keywords that differentiate this provision from others
 4. Apply appropriate proximity patterns based on whether terms are common or specific
-5. Return recommendations in the format:
+5. ALWAYS wrap multi-word proximity expressions in parentheses: (word1 /3 word2)
+6. Return recommendations in the format:
 
 Update the query so that:
 - [original statute query] is expanded to [expanded query with concepts] (adding distinctive concepts from [specific provision])
