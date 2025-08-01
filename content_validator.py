@@ -66,12 +66,12 @@ Return a structured response with:
             output_type=ValidationOutput
         )
     
-    async def validate_statute_result(self, citation: str, search_result: Dict, page_content: str = None) -> ValidationOutput:
+    async def validate_statute_result(self, citation_info: Dict[str, str], search_result: Dict, page_content: str = None) -> ValidationOutput:
         """
         Validate that a search result contains the correct statute.
         
         Args:
-            citation: The statute citation being searched for
+            citation_info: Dict with 'citation', 'normalized', and optionally 'subsection'
             search_result: Search result dict with title, url, description
             page_content: The raw HTML content of the page
             
@@ -81,25 +81,44 @@ Return a structured response with:
         try:
             if page_content and not page_content.startswith("Error"):
                 # Use full HTML for validation
-                prompt = f"""Validate this HTML page for statute: {citation}
+                if citation_info.get('subsection'):
+                    # User typed something like "544a", "544a1", "544a1Ai", etc.
+                    prompt = f"""Validate this page for a statute citation.
 
 URL: {search_result.get('url', '')}
 
 FULL HTML CONTENT:
 {page_content}
 
-Does this page contain the cited statutory provision {citation}?
+User searched for: "{citation_info['citation']}"
+We interpret this as:
+- Parent section: {citation_info['normalized']} 
+- Subsection path: {citation_info['subsection']}
 
-Important:
-- "363a" means section 363(a) - look for <a name="a"> after section 363
-- "363f3" means section 363(f)(3) - look for nested subsections
-- Check the HTML structure, not just text
-- The page should be from law.cornell.edu
+Please verify:
+1. Is this the correct parent section ({citation_info['normalized']})?
+2. Does this section contain the subsection path {citation_info['subsection']}?
 
-The user is looking for {citation}. Be thorough in checking if this specific provision is present."""
+Subsection examples:
+- (a) = first level
+- (a)(1) = second level 
+- (a)(1)(A) = third level
+- (a)(1)(A)(i) = fourth level
+
+Return true if the page contains the parent section AND the specified subsection path."""
+                else:
+                    # User typed just a section number like "544"
+                    prompt = f"""Validate this page for statute: {citation_info['normalized']}
+    
+URL: {search_result.get('url', '')}
+
+FULL HTML CONTENT:
+{page_content}
+
+Is this the correct page for {citation_info['normalized']}?"""
             else:
                 # Fallback to metadata validation
-                prompt = f"""Validate this search result for statute: {citation}
+                prompt = f"""Validate this search result for statute: {citation_info.get('citation', citation_info.get('normalized', ''))}
 
 Title: {search_result.get('title', '')}
 URL: {search_result.get('url', '')}

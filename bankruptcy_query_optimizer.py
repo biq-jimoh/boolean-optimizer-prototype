@@ -251,7 +251,7 @@ Example response without recommendations:
             
             # 4. Validate with actual content
             validation = await self.content_validator.validate_statute_result(
-                citation_info['citation'], 
+                citation_info,  # Pass full citation info dict
                 search_results[0],
                 content  # Pass the actual page content
             )
