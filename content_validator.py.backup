@@ -94,14 +94,7 @@ URL: {search_result.get('url', '')}
 PAGE CONTENT (first 2000 chars):
 {content_preview}
 
-Does this page contain the cited statutory provision?
-
-The user is looking for {citation}. Use your judgment to determine if the requested provision is on this page, considering:
-- Different formatting styles (with/without parentheses, spaces, etc.)
-- The substance of what's being requested
-- Common variations in how legal citations are written
-
-Don't be overly literal - focus on whether the actual legal provision the user wants is present on the page."""
+Does this page contain the specific statute {citation}? Look for exact section numbers and subsections."""
             else:
                 # Fallback to metadata validation
                 prompt = f"""Validate this search result for statute: {citation}
@@ -149,17 +142,10 @@ URL: {search_result.get('url', '')}
 PAGE CONTENT (first 2000 chars):
 {content_preview}
 
-Does this page contain the full opinion for the cited case?
-
-IMPORTANT: 
-- Look for the actual judicial opinion, not just citations or references
-- The case name may appear in various formats (e.g., "Stern v. Marshall" or "STERN v. MARSHALL")
-- Verify this is the opinion text with judicial analysis, not just:
-  - An authorities/citations page
-  - A summary or syllabus
-  - A list of related cases
-
-Return true only if this contains the actual court opinion with the judge's analysis and decision."""
+Is this the full case opinion for {case_name}? Look for:
+- The case name in the content
+- Opinion text (not just citations/authorities)
+- Judge's analysis and decision"""
             else:
                 # Fallback to metadata validation
                 prompt = f"""Validate this search result for case: {case_name}

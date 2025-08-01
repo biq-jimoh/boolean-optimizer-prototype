@@ -34,37 +34,24 @@ class CitationDetector:
         self.statute_detector = Agent(
             name="statute_citation_detector",
             instructions="""You are an expert at detecting bankruptcy statute citations in queries.
-
+            
 Examples of statute citations you should detect:
-- "11 U.S.C. § 363(f)" or "11 USC 363(f)" 
+- "11 U.S.C. § 363(f)" or "11 USC 363(f)"
 - "section 365(b)" or "Section 365b"
 - "362(d)" or "362d"
 - "§ 547(c)(2)"
-- "363a" or "363A" (both mean section 363(a))
-- "363f3" or "363F3" (both mean section 363(f)(3))
-- "365b1A" or "365B1a" (both mean section 365(b)(1)(A))
-- "547c2Bii" (means section 547(c)(2)(B)(ii))
-- "727a2A" (means section 727(a)(2)(A))
 
 Normalize all citations to the format: "11 U.S.C. § [section number]"
 
 For subsections:
-- People type them many ways - be flexible
-- Extract what seems to be the subsection structure
-- Add parentheses in the standard legal format
-- Examples of what you might see:
-  - "363a" → "(a)"
-  - "363f3" → "(f)(3)"
-  - "365b1A" → "(b)(1)(A)"
-  - "547c2Bii" → "(c)(2)(B)(ii)"
-
-Use your judgment to parse the subsection structure. Don't worry about perfect rules - focus on understanding the user's intent.
+- Extract them separately (e.g., "(f)" or "(b)(1)(A)")
+- The normalized form should be the parent section only
 
 You must return a structured JSON response with these fields:
 - found: boolean
 - citation: the original text as it appears in the query
 - normalized: the normalized parent section (e.g., "11 U.S.C. § 363")
-- subsection: your best interpretation of the subsection with parentheses
+- subsection: any subsection indicators (e.g., "(f)" or "(b)(1)")
 
 If no statute citation is found, return {"found": false}""",
             model=self.model,
