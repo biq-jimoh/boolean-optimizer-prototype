@@ -1,6 +1,7 @@
 """
 Content Validation Module
 Uses LLM to validate that search results contain the correct legal content.
+Now works with raw HTML for better accuracy.
 """
 
 from typing import Dict
@@ -25,18 +26,18 @@ class ContentValidator:
         # Create validation agents
         self.statute_validator = Agent(
             name="statute_content_validator",
-            instructions="""You validate whether web search results contain the correct statute text.
+            instructions="""You validate whether web pages contain the correct statute text.
             
-Your task is to determine if a search result actually contains the statute being searched for.
+Your task is to analyze HTML content and determine if it contains the statute being searched for.
 
 Be strict in your validation:
 - The page MUST be from law.cornell.edu (Legal Information Institute)
-- The title or URL should clearly indicate it's the correct statute section
-- The description should reference the specific section number
-- Look for indicators like "U.S. Code", the section number, and relevant legal terminology
+- Look for the specific statute section and subsection in the HTML
+- Understand that citations like "363a" mean section 363(a)
+- Check for HTML anchors like <a name="a"> for subsections
 
 Return a structured response with:
-- is_valid: true only if you're certain this is the correct statute page
+- is_valid: true only if you're certain this page contains the requested provision
 - confidence: 0.0 to 1.0 (use 0.9+ only for clear matches)
 - reason: brief explanation of your decision""",
             model=self.model,
@@ -46,22 +47,18 @@ Return a structured response with:
         
         self.case_validator = Agent(
             name="case_content_validator",
-            instructions="""You validate whether web search results contain the correct case opinion.
+            instructions="""You validate whether web pages contain the correct case opinion.
             
-Your task is to determine if a search result actually contains the case being searched for.
+Your task is to analyze HTML content and determine if it contains the case being searched for.
 
 Be strict in your validation:
 - The page should be from courtlistener.com/opinion
-- The title should contain the case name (parties)
-- Look for court information and year if provided
-- The description should indicate it's a court opinion
-
-Consider variations in case names:
-- "Stern v. Marshall" could appear as "Stern v Marshall" or "STERN v. MARSHALL"
-- Partial matches are acceptable if clearly the same case
+- Look for the actual opinion text, not just citations or authorities pages
+- Check for judge names, court information, and legal analysis
+- The URL might have tabs like /authorities/ - these are NOT the opinion
 
 Return a structured response with:
-- is_valid: true only if you're confident this is the correct case
+- is_valid: true only if this contains the actual court opinion
 - confidence: 0.0 to 1.0 (use 0.9+ only for clear matches)
 - reason: brief explanation of your decision""",
             model=self.model,
@@ -76,32 +73,30 @@ Return a structured response with:
         Args:
             citation: The statute citation being searched for
             search_result: Search result dict with title, url, description
-            page_content: Optional actual page content for deeper validation
+            page_content: The raw HTML content of the page
             
         Returns:
             ValidationOutput with validation results
         """
         try:
-            # Prepare validation prompt
-            if page_content:
-                # Use actual page content for validation
-                # Limit content to first 2000 chars to avoid overwhelming the validator
-                content_preview = page_content[:2000] + "..." if len(page_content) > 2000 else page_content
-                prompt = f"""Validate this page content for statute: {citation}
+            if page_content and not page_content.startswith("Error"):
+                # Use full HTML for validation
+                prompt = f"""Validate this HTML page for statute: {citation}
 
 URL: {search_result.get('url', '')}
 
-PAGE CONTENT (first 2000 chars):
-{content_preview}
+FULL HTML CONTENT:
+{page_content}
 
-Does this page contain the cited statutory provision?
+Does this page contain the cited statutory provision {citation}?
 
-The user is looking for {citation}. Use your judgment to determine if the requested provision is on this page, considering:
-- Different formatting styles (with/without parentheses, spaces, etc.)
-- The substance of what's being requested
-- Common variations in how legal citations are written
+Important:
+- "363a" means section 363(a) - look for <a name="a"> after section 363
+- "363f3" means section 363(f)(3) - look for nested subsections
+- Check the HTML structure, not just text
+- The page should be from law.cornell.edu
 
-Don't be overly literal - focus on whether the actual legal provision the user wants is present on the page."""
+The user is looking for {citation}. Be thorough in checking if this specific provision is present."""
             else:
                 # Fallback to metadata validation
                 prompt = f"""Validate this search result for statute: {citation}
@@ -117,7 +112,6 @@ Is this the correct statute page?"""
             
         except Exception as e:
             print(f"Error validating statute result: {e}")
-            # Return invalid result on error
             return ValidationOutput(
                 is_valid=False,
                 confidence=0.0,
@@ -131,35 +125,30 @@ Is this the correct statute page?"""
         Args:
             case_name: The case name being searched for
             search_result: Search result dict with title, url, description
-            page_content: Optional actual page content for deeper validation
+            page_content: The raw HTML content of the page
             
         Returns:
             ValidationOutput with validation results
         """
         try:
-            # Prepare validation prompt
-            if page_content:
-                # Use actual page content for validation
-                # Limit content to first 2000 chars to avoid overwhelming the validator
-                content_preview = page_content[:2000] + "..." if len(page_content) > 2000 else page_content
-                prompt = f"""Validate this page content for case: {case_name}
+            if page_content and not page_content.startswith("Error"):
+                # Use full HTML for validation
+                prompt = f"""Validate this HTML page for case: {case_name}
 
 URL: {search_result.get('url', '')}
 
-PAGE CONTENT (first 2000 chars):
-{content_preview}
+FULL HTML CONTENT:
+{page_content}
 
-Does this page contain the full opinion for the cited case?
+Does this page contain the full opinion for the cited case {case_name}?
 
-IMPORTANT: 
-- Look for the actual judicial opinion, not just citations or references
-- The case name may appear in various formats (e.g., "Stern v. Marshall" or "STERN v. MARSHALL")
-- Verify this is the opinion text with judicial analysis, not just:
-  - An authorities/citations page
-  - A summary or syllabus
-  - A list of related cases
+Important: 
+- Look for the actual judicial opinion with analysis and decision
+- Check if this is the main opinion page, not /authorities/ or /citations/
+- The HTML should contain judge names, court analysis, legal reasoning
+- Verify this is from courtlistener.com/opinion
 
-Return true only if this contains the actual court opinion with the judge's analysis and decision."""
+Return true only if this contains the actual court opinion."""
             else:
                 # Fallback to metadata validation
                 prompt = f"""Validate this search result for case: {case_name}
@@ -175,7 +164,6 @@ Is this the correct case opinion?"""
             
         except Exception as e:
             print(f"Error validating case result: {e}")
-            # Return invalid result on error
             return ValidationOutput(
                 is_valid=False,
                 confidence=0.0,
