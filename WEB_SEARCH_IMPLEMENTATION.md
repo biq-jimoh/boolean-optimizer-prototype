@@ -57,6 +57,19 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
 - They are **skipped entirely** if web search fails or returns no valid results
 - They **never** use their built-in knowledge to make recommendations
 
+### Content-Based Validation
+
+The system now validates search results using the **actual page content** rather than just metadata:
+
+1. **Fetch First**: When a search result is found, the system immediately fetches the page content
+2. **Content Validation**: The validator examines the actual text to ensure it contains the specific statute/case requested
+   - For statutes: Checks for exact section numbers and subsections (e.g., "363(a)" not just "363")
+   - For cases: Verifies it's the full opinion text, not just a citations page
+3. **Better Accuracy**: This approach catches cases where:
+   - A page about section 363 might contain subsection 363(a)
+   - A search result title doesn't fully describe the content
+   - The page contains multiple related statutes or cases
+
 ## Configuration
 
 ### Environment Variables

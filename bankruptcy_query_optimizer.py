@@ -237,10 +237,22 @@ Example response without recommendations:
                 self._log("No search results found for statute")
                 return None
                 
-            # 3. Validate first result
+            # 3. Extract content first to validate with actual page content
+            self._log(f"Fetching content from: {search_results[0]['url']}")
+            content = await self.content_extractor.extract_statute_text(
+                search_results[0]['url'],
+                citation_info.get('subsection')
+            )
+            
+            if not content or len(content.strip()) < 100:
+                self._log("Failed to extract meaningful content from page")
+                return None
+            
+            # 4. Validate with actual content
             validation = await self.content_validator.validate_statute_result(
                 citation_info['citation'], 
-                search_results[0]
+                search_results[0],
+                content  # Pass the actual page content
             )
             
             if not validation.is_valid:
@@ -248,12 +260,6 @@ Example response without recommendations:
                 return None
                 
             self._log(f"Valid statute page found: {search_results[0]['url']}")
-            
-            # 4. Extract content
-            content = await self.content_extractor.extract_statute_text(
-                search_results[0]['url'],
-                citation_info.get('subsection')
-            )
             
             # 5. Return enhanced query
             return f"{query}\n\nSTATUTE TEXT FROM {search_results[0]['url']}:\n{content}"
@@ -283,10 +289,21 @@ Example response without recommendations:
                 self._log("No search results found for case")
                 return None
                 
-            # 3. Validate first result
+            # 3. Extract content first to validate with actual page content
+            self._log(f"Fetching content from: {search_results[0]['url']}")
+            content = await self.content_extractor.extract_case_text(
+                search_results[0]['url']
+            )
+            
+            if not content or len(content.strip()) < 100:
+                self._log("Failed to extract meaningful content from page")
+                return None
+            
+            # 4. Validate with actual content
             validation = await self.content_validator.validate_case_result(
                 case_info['case_name'], 
-                search_results[0]
+                search_results[0],
+                content  # Pass the actual page content
             )
             
             if not validation.is_valid:
@@ -294,11 +311,6 @@ Example response without recommendations:
                 return None
                 
             self._log(f"Valid case opinion found: {search_results[0]['url']}")
-            
-            # 4. Extract content
-            content = await self.content_extractor.extract_case_text(
-                search_results[0]['url']
-            )
             
             # 5. Return enhanced query
             return f"{query}\n\nCASE OPINION TEXT FROM {search_results[0]['url']}:\n{content}"

@@ -69,20 +69,35 @@ Return a structured response with:
             output_type=ValidationOutput
         )
     
-    async def validate_statute_result(self, citation: str, search_result: Dict) -> ValidationOutput:
+    async def validate_statute_result(self, citation: str, search_result: Dict, page_content: str = None) -> ValidationOutput:
         """
         Validate that a search result contains the correct statute.
         
         Args:
             citation: The statute citation being searched for
             search_result: Search result dict with title, url, description
+            page_content: Optional actual page content for deeper validation
             
         Returns:
             ValidationOutput with validation results
         """
         try:
             # Prepare validation prompt
-            prompt = f"""Validate this search result for statute: {citation}
+            if page_content:
+                # Use actual page content for validation
+                # Limit content to first 2000 chars to avoid overwhelming the validator
+                content_preview = page_content[:2000] + "..." if len(page_content) > 2000 else page_content
+                prompt = f"""Validate this page content for statute: {citation}
+
+URL: {search_result.get('url', '')}
+
+PAGE CONTENT (first 2000 chars):
+{content_preview}
+
+Does this page contain the specific statute {citation}? Look for exact section numbers and subsections."""
+            else:
+                # Fallback to metadata validation
+                prompt = f"""Validate this search result for statute: {citation}
 
 Title: {search_result.get('title', '')}
 URL: {search_result.get('url', '')}
@@ -102,20 +117,38 @@ Is this the correct statute page?"""
                 reason=f"Validation error: {str(e)}"
             )
     
-    async def validate_case_result(self, case_name: str, search_result: Dict) -> ValidationOutput:
+    async def validate_case_result(self, case_name: str, search_result: Dict, page_content: str = None) -> ValidationOutput:
         """
         Validate that a search result contains the correct case.
         
         Args:
             case_name: The case name being searched for
             search_result: Search result dict with title, url, description
+            page_content: Optional actual page content for deeper validation
             
         Returns:
             ValidationOutput with validation results
         """
         try:
             # Prepare validation prompt
-            prompt = f"""Validate this search result for case: {case_name}
+            if page_content:
+                # Use actual page content for validation
+                # Limit content to first 2000 chars to avoid overwhelming the validator
+                content_preview = page_content[:2000] + "..." if len(page_content) > 2000 else page_content
+                prompt = f"""Validate this page content for case: {case_name}
+
+URL: {search_result.get('url', '')}
+
+PAGE CONTENT (first 2000 chars):
+{content_preview}
+
+Is this the full case opinion for {case_name}? Look for:
+- The case name in the content
+- Opinion text (not just citations/authorities)
+- Judge's analysis and decision"""
+            else:
+                # Fallback to metadata validation
+                prompt = f"""Validate this search result for case: {case_name}
 
 Title: {search_result.get('title', '')}
 URL: {search_result.get('url', '')}
