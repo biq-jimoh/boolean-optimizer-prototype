@@ -10,23 +10,23 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
 
 1. **CitationDetector** (`citation_detector.py`)
    - Uses Agent SDK to detect statute and case citations in queries
-   - Normalizes statute citations to standard format (e.g., "11 U.S.C. § 363")
-   - Formats case names for searching
+   - Flexibly recognizes various formats: "363a", "363f3", "365b1A", etc.
+   - Normalizes citations and extracts subsection structure
 
 2. **BraveSearchService** (`brave_search_service.py`)
-   - Performs web searches using Brave Search API
+   - Performs web searches using Brave Search API via direct HTTP calls
    - Searches law.cornell.edu for statutes
    - Searches courtlistener.com/opinion for cases
 
 3. **ContentValidator** (`content_validator.py`)
-   - Uses Agent SDK to validate search results
-   - Ensures the found page contains the correct legal document
-   - Provides confidence scores
+   - Uses Agent SDK to validate search results using raw HTML
+   - Leverages GPT-4.1's 1M token context window
+   - Analyzes HTML structure to find specific provisions
 
 4. **ContentExtractor** (`content_extractor.py`)
-   - Fetches web pages and extracts relevant text
-   - Handles HTML parsing and cleanup
-   - Intelligently truncates content to fit context limits
+   - Simple HTTP client that fetches raw HTML
+   - No complex parsing or extraction - just returns the full page
+   - Lets the LLM handle understanding the content
 
 ### Modified Files
 
@@ -44,8 +44,8 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
    - Citation detection and web searches happen in parallel
 3. **Web Search Process** (for detected citations):
    - Search the appropriate legal database
-   - Validate the first result using LLM
-   - Extract the relevant content from the page
+   - Fetch the full HTML page
+   - Validate using the actual page content (not just metadata)
 4. **Enhanced Execution**: 
    - If web content is found: SI-7 and SI-8 receive the original query plus the fetched legal text
    - If no web content found: SI-7 and SI-8 are skipped entirely
@@ -57,18 +57,15 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
 - They are **skipped entirely** if web search fails or returns no valid results
 - They **never** use their built-in knowledge to make recommendations
 
-### Content-Based Validation
+### Raw HTML Validation
 
-The system now validates search results using the **actual page content** rather than just metadata:
+The system now uses raw HTML for validation, taking advantage of GPT-4.1's massive context window:
 
-1. **Fetch First**: When a search result is found, the system immediately fetches the page content
-2. **Content Validation**: The validator examines the actual text to ensure it contains the specific statute/case requested
-   - For statutes: Checks for exact section numbers and subsections (e.g., "363(a)" not just "363")
-   - For cases: Verifies it's the full opinion text, not just a citations page
-3. **Better Accuracy**: This approach catches cases where:
-   - A page about section 363 might contain subsection 363(a)
-   - A search result title doesn't fully describe the content
-   - The page contains multiple related statutes or cases
+1. **Full Context**: The entire HTML page (typically 70-100KB) is sent to the validator
+2. **Structure-Aware**: The validator can see HTML elements like `<a name="a">` for subsections
+3. **Flexible Recognition**: Understands that "363a" means section 363(a)
+4. **No Regex Bugs**: Eliminates complex extraction logic that was causing errors
+5. **Better Accuracy**: Can find nested subsections and understand page structure
 
 ## Configuration
 
@@ -119,8 +116,10 @@ optimizer = BankruptcyQueryOptimizer(
     brave_api_key="your_brave_api_key"  # Or set BRAVE_SEARCH_API_KEY env var
 )
 
-# Query with statute citation
-result = optimizer.optimize_query_sync("section 363(f)")
+# Query with various statute formats
+result = optimizer.optimize_query_sync("363a")  # Works!
+result = optimizer.optimize_query_sync("363f3")  # Works!
+result = optimizer.optimize_query_sync("section 363(f)")  # Works!
 
 # Query with case citation  
 result = optimizer.optimize_query_sync("Stern v. Marshall")
@@ -130,12 +129,12 @@ result = optimizer.optimize_query_sync("Stern v. Marshall")
 
 - Web searches add 2-5 seconds to SI-7/SI-8 execution time
 - Other consultants are not affected and run at full speed
-- Failed web searches gracefully fall back to original behavior
-- Timeouts prevent indefinite waiting
+- Failed web searches gracefully fall back to skipping the consultants
+- HTML pages are typically 70-100KB - tiny compared to GPT-4.1's 1M token limit
 
 ## Security Considerations
 
 - User-Agent header identifies requests as coming from BankruptcyQueryOptimizer
 - No credentials are sent to law.cornell.edu or courtlistener.com
 - Brave API key is kept secure and never logged
-- HTML content is sanitized before processing
+- Raw HTML is sent directly to the LLM without processing
