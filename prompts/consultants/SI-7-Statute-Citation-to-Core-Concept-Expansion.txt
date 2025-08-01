@@ -19,6 +19,9 @@ Never use the parent section's core concept as a keyword for subsections.
 - Do NOT use your built-in knowledge of statutes
 - Extract keywords ONLY from the actual statute text provided
 - If no statute text is provided, respond with no recommendations
+- For multi-word phrases, use proximity operators with parentheses instead of quotes
+- Standard format: (word1 /3 word2) or (word1 /3 word2 /3 word3)
+- Always use /3 for proximity between words in a phrase
 </critical_requirements>
 
 <keyword_approaches>
@@ -53,7 +56,7 @@ Example for 365(b)(1)(A):
 <example provision="362(d)">
 <title>relief from stay</title>
 <good>
-- "equity cushion", cause (specific to 362(d))
+- (equity /3 cushion), cause (specific to 362(d))
 </good>
 <bad>
 - stay, automatic (appear throughout Section 362)
@@ -73,7 +76,7 @@ Example for 365(b)(1)(A):
 <example provision="547(c)(2)">
 <title>ordinary course defense</title>
 <good>
-- "ordinary course", "industry practice" (specific to this defense)
+- (ordinary /3 course), (industry /3 practice!) (specific to this defense)
 </good>
 <bad>
 - preference, transfer (appear throughout Section 547)
@@ -83,11 +86,11 @@ Example for 365(b)(1)(A):
 
 <query_examples>
 - ("11 U.S.C. 363" OR "11 USC 363") OR ((section OR §) +0 363) OR 363 → 
-  (("11 U.S.C. 363" OR "11 USC 363") OR ((section OR §) +0 363) OR 363) OR (free /3 clear) OR stalking /3 horse OR (363 /50 (auction OR bid! OR sale))
+  (("11 U.S.C. 363" OR "11 USC 363") OR ((section OR §) +0 363) OR 363) OR (free! /3 clear!) OR (stalk! /3 horse) OR (363 /50 (auction OR bid! OR sale))
 - ((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b) → 
-  (((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b)) OR (365 /50 (cure OR default)) OR (cure /3 amount) OR (adequate! /3 assur!)
+  (((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b)) OR (365 /50 (cure OR default)) OR (cure! /3 amount!) OR (adequate! /3 assur!)
 - ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d) → 
-  (((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)) OR (362 /50 relief) OR cause OR "equity cushion" OR "lack of adequate protection"
+  (((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)) OR (362 /50 relief) OR cause OR (equity /3 cushion) OR (lack /3 adequate! /3 protect!)
 </query_examples>
 </suggestion>
 

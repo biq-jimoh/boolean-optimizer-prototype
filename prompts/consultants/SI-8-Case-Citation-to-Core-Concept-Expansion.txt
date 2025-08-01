@@ -14,6 +14,9 @@ For landmark bankruptcy cases, add the distinctive legal concepts, tests, or ter
 - If no case opinion text is provided, respond with no recommendations
 - ONLY add terms that are distinctively found in the provided case text
 - Do NOT add generic bankruptcy terms that could apply to many cases
+- For multi-word phrases, use proximity operators with parentheses instead of quotes
+- Standard format: (word1 /3 word2) or (word1 /3 word2 /3 word3)
+- Always use /3 for proximity between words in a phrase
 </critical_requirements>
 
 <case_citation_formats>
@@ -32,35 +35,35 @@ Unlike statute expansions, case concept terms can stand alone without proximity 
 <example case="Stern v. Marshall">
 <citations>Stern</citations>
 <concepts>
-- core /3 proceeding OR core /3 jurisdiction
-- constitutional /3 authority
-- Article /3 III
+- (core /3 proceeding) OR (core /3 jurisdiction)
+- (constitutional /3 authority)
+- (Article /3 III)
 </concepts>
 <final_query>
-Stern OR (core /3 proceeding OR core /3 jurisdiction) OR constitutional /3 authority OR Article /3 III
+Stern OR ((core /3 proceeding) OR (core /3 jurisdiction)) OR (constitutional /3 authority) OR (Article /3 III)
 </final_query>
 </example>
 
 <example case="Till v. SCS Credit">
 <citations>Till</citations>
 <concepts>
-- prime /3 plus
-- formula /3 rate
-- (cramdown OR cram-down OR "cram down") /3 interest
+- (prime /3 plus)
+- (formula /3 rate)
+- ((cramdown OR cram-down OR (cram /3 down)) /3 interest)
 </concepts>
 <final_query>
-Till OR prime /3 plus OR formula /3 rate OR (cramdown OR cram-down OR "cram down") /3 interest
+Till OR (prime /3 plus) OR (formula /3 rate) OR ((cramdown OR cram-down OR (cram /3 down)) /3 interest)
 </final_query>
 </example>
 
 <example case="RadLAX Gateway Hotel">
 <citations>RadLAX</citations>
 <concepts>
-- credit /3 bid OR credit /3 bidding OR credit /3 bid!
-- indubitable /3 equivalent
+- (credit /3 bid) OR (credit /3 bidding) OR (credit /3 bid!)
+- (indubitable /3 equivalent)
 </concepts>
 <final_query>
-RadLAX OR (credit /3 bid OR credit /3 bidding OR credit /3 bid!) OR indubitable /3 equivalent
+RadLAX OR ((credit /3 bid) OR (credit /3 bidding) OR (credit /3 bid!)) OR (indubitable /3 equivalent)
 </final_query>
 </example>
 </case_examples>
@@ -74,9 +77,9 @@ Only expand cases that:
 </selection_criteria>
 
 <query_examples>
-- Stern → Stern OR (core /3 proceeding OR core /3 jurisdiction) OR constitutional /3 authority OR Article /3 III
-- Till → Till OR prime /3 plus OR formula /3 rate OR (cramdown OR cram-down OR "cram down") /3 interest
-- RadLAX → RadLAX OR (credit /3 bid OR credit /3 bidding OR credit /3 bid!) OR indubitable /3 equivalent
+- Stern → Stern OR ((core /3 proceeding) OR (core /3 jurisdiction)) OR (constitutional /3 authority) OR (Article /3 III)
+- Till → Till OR (prime /3 plus) OR (formula /3 rate) OR ((cramdown OR cram-down OR (cram /3 down)) /3 interest)
+- RadLAX → RadLAX OR ((credit /3 bid) OR (credit /3 bidding) OR (credit /3 bid!)) OR (indubitable /3 equivalent)
 </query_examples>
 </suggestion>
 
