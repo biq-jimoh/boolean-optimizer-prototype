@@ -79,46 +79,46 @@ Note: Multi-word phrases ALWAYS need parentheses: (word1 /3 word2)
 </keyword_approaches>
 
 <provision_examples>
-<example provision="362(d)">
-<title>relief from stay</title>
+<example provision="544(a)">
+<title>strong-arm powers</title>
 <good>
-- (equity /3 cushion), cause (specific to 362(d))
+- (bona /3 fide /3 purchaser), (judicial /3 lien), (simple /3 contract) (specific to 544(a))
 </good>
 <bad>
-- stay, automatic (appear throughout Section 362)
+- trustee, avoid (appear throughout Chapter 5)
 </bad>
 </example>
 
-<example provision="365(b)">
-<title>cure requirements</title>
+<example provision="547(c)">
+<title>preference defenses</title>
 <good>
-- adequate! /3 assur!, cure /3 amount (specific to 365(b))
+- (ordinary /3 course /3 business), (new /3 value), (substantially /3 contemporaneous) (specific to 547(c))
 </good>
 <bad>
-- executory, contract (appear throughout Section 365)
+- preference, transfer, antecedent (appear throughout Section 547)
 </bad>
 </example>
 
-<example provision="547(c)(2)">
-<title>ordinary course defense</title>
+<example provision="548(a)">
+<title>fraudulent transfers</title>
 <good>
-- (ordinary /3 course), (industry /3 practice!) (specific to this defense)
+- (reasonably /3 equivalent /3 value), (actual /3 intent), (hinder /3 delay /3 defraud) (specific to 548(a))
 </good>
 <bad>
-- preference, transfer (appear throughout Section 547)
+- transfer, avoid (appear throughout avoidance sections)
 </bad>
 </example>
 </provision_examples>
 
 <query_examples>
-- ("11 U.S.C. 363" OR "11 USC 363") OR ((section OR §) +0 363) OR 363 → 
-  (("11 U.S.C. 363" OR "11 USC 363") OR ((section OR §) +0 363) OR 363) OR (free! /3 clear!) OR (stalk! /3 horse) OR (363 /50 (auction OR bid! OR sale))
-- ((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b) → 
-  (((section OR §) +0 ("365(b)" OR 365b)) OR ("365(b)" OR 365b)) OR (365 /50 (cure OR default)) OR (cure! /3 amount!) OR (adequate! /3 assur!)
-- ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d) → 
-  (((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)) OR (362 /50 relief) OR cause OR (equity /3 cushion) OR (lack /3 adequate! /3 protect!)
-- ((section OR §) +0 ("363(b)" OR 363b)) OR ("363(b)" OR 363b) → 
-  (((section OR §) +0 ("363(b)" OR 363b)) OR ("363(b)" OR 363b)) OR (363 /50 ((personally /3 identifiable /3 information) OR (consumer /3 privacy /3 ombudsman) OR (federal /3 trade /3 commission)))
+- ("11 U.S.C. 544" OR "11 USC 544") OR ((section OR §) +0 544) OR 544 → 
+  (("11 U.S.C. 544" OR "11 USC 544") OR ((section OR §) +0 544) OR 544) OR (bona /3 fide /3 purchaser) OR (judicial /3 lien) OR (simple /3 contract) OR (544 /50 ((hypothetical /3 creditor) OR (strong /3 arm)))
+- ((section OR §) +0 ("547(c)" OR 547c)) OR ("547(c)" OR 547c) → 
+  (((section OR §) +0 ("547(c)" OR 547c)) OR ("547(c)" OR 547c)) OR (547 /50 defense!) OR (ordinary /3 course /3 business) OR (new /3 value) OR (substantially /3 contemporaneous)
+- ((section OR §) +0 ("548(a)" OR 548a)) OR ("548(a)" OR 548a) → 
+  (((section OR §) +0 ("548(a)" OR 548a)) OR ("548(a)" OR 548a)) OR (548 /50 fraudulent) OR (reasonably /3 equivalent /3 value) OR (actual /3 intent) OR (hinder /3 delay /3 defraud)
+- ((section OR §) +0 ("522(f)" OR 522f)) OR ("522(f)" OR 522f) → 
+  (((section OR §) +0 ("522(f)" OR 522f)) OR ("522(f)" OR 522f)) OR (522 /50 ((judicial /3 lien) OR (nonpossessory /3 nonpurchase /3 money) OR impair!)) OR (household /3 goods) OR (tools /3 trade)
 </query_examples>
 </suggestion>
 
