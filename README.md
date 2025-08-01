@@ -23,9 +23,20 @@ cd bankruptcy-query-optimizer
 pip install -r requirements.txt
 ```
 
-3. Set your OpenAI API key:
+3. Set up environment variables:
 ```bash
-export OPENAI_API_KEY="your-api-key-here"
+# Copy the example environment file
+cp env.example .env
+
+# Edit .env and add your API keys
+# - OPENAI_API_KEY (required)
+# - BRAVE_SEARCH_API_KEY (optional, enables web search for SI-7 and SI-8)
+```
+
+Or set them directly:
+```bash
+export OPENAI_API_KEY="your-openai-api-key"
+export BRAVE_SEARCH_API_KEY="your-brave-api-key"  # Optional
 ```
 
 ## Quick Start
