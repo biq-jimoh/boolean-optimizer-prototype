@@ -5,7 +5,6 @@ Uses browser-like headers, HTTP/2, delays, and Playwright fallback for WAF bypas
 
 from typing import Optional
 import httpx
-import random
 import asyncio
 from urllib.parse import urlparse
 from token_budget import TokenBudgetConfig
@@ -57,11 +56,6 @@ class ContentExtractor:
         
         return headers
     
-    async def _random_delay(self):
-        """Add a random delay to mimic human behavior."""
-        delay = random.uniform(0.5, 2.0)
-        await asyncio.sleep(delay)
-    
     def truncate_to_token_limit(self, content: str, max_tokens: int) -> str:
         """
         Simple truncation to fit within token limit.
@@ -90,9 +84,6 @@ class ContentExtractor:
             Tuple of (content, success_bool)
         """
         try:
-            # Add random delay to mimic human browsing
-            await self._random_delay()
-            
             headers = self._get_headers_for_url(url)
             
             async with httpx.AsyncClient(
