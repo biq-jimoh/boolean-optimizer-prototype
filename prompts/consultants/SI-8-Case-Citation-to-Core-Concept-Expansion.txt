@@ -115,6 +115,68 @@ Till OR ((((section OR §) +0 ("1325(a)(5)(B)" OR "1325a5b")) OR ("1325(a)(5)(B)
 RadLAX OR ((((section OR §) +0 ("1129(b)(2)(A)" OR "1129b2a")) OR ("1129(b)(2)(A)" OR "1129b2a") OR ((section OR §) +0 ("1129(b)" OR 1129b)) OR ("1129(b)" OR 1129b) OR ((section OR §) +0 1129) OR 1129 OR "11 U.S.C. 1129" OR "11 USC 1129") /50 ((credit /3 bid) OR (indubitable /3 equivalent)))
 </final_query>
 </example>
+
+<example case="Stern v. Marshall">
+<statute>Core proceedings under 28 U.S.C. § 157</statute>
+<concepts_from_opinion>
+- core proceeding
+- Article III
+- bankruptcy jurisdiction
+- counterclaim
+</concepts_from_opinion>
+<final_query>
+Stern /3 Marshall AND ("core proceeding" OR "Article III" OR (jurisdiction /3 (bankruptcy OR counterclaim)))
+</final_query>
+</example>
+
+<example case="In re WorldCom">
+<statute>SEC claims and administrative priority</statute>
+<concepts_from_opinion>
+- SEC OR S.E.C. OR "Securities and Exchange Commission"
+- securities fraud
+- administrative priority
+</concepts_from_opinion>
+<final_query>
+"In re WorldCom" AND ((SEC OR S.E.C. OR "Securities and Exchange Commission") OR ("securities fraud" /3 claim) OR (priority /3 administrative))
+</final_query>
+</example>
+
+<example case="In re Enron">
+<statute>ERISA claims in bankruptcy</statute>
+<concepts_from_opinion>
+- ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act"
+- pension plan
+- 401(k)
+</concepts_from_opinion>
+<final_query>
+"In re Enron" AND ((ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act") /5 (claim OR "pension plan" OR "401(k)"))
+</final_query>
+</example>
+
+<example case="In re General Motors">
+<statute>WARN Act compliance</statute>
+<concepts_from_opinion>
+- WARN OR W.A.R.N. OR "Worker Adjustment and Retraining Notification"
+- plant closing
+- mass layoff
+- 60 days notice
+</concepts_from_opinion>
+<final_query>
+"In re General Motors" AND ((WARN OR W.A.R.N. OR "Worker Adjustment and Retraining Notification") /5 Act) AND ("plant closing" OR "mass layoff" OR (60 /2 days))
+</final_query>
+</example>
+
+<example case="In re Chrysler">
+<statute>NLRB and collective bargaining</statute>
+<concepts_from_opinion>
+- NLRB OR N.L.R.B. OR "National Labor Relations Board"
+- collective bargaining agreement
+- union contract
+</concepts_from_opinion>
+<final_query>
+"In re Chrysler" AND ((NLRB OR N.L.R.B. OR "National Labor Relations Board") OR ("collective bargaining" /3 agreement) OR (union /3 contract))
+</final_query>
+</example>
 </case_examples>
 
 <selection_criteria>

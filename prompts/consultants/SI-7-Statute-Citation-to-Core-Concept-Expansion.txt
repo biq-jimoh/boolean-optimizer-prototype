@@ -164,6 +164,51 @@ Most terms cannot be added - "strong arm", "bona fide purchaser", etc. are too g
 Proximity to 544 would be pointless since we're already searching for 544
 </expansion>
 </example>
+
+<example provision="507(a)(5)">
+<title>employee benefit plan priority with ERISA</title>
+<input_query>"11 U.S.C. 507(a)(5)"</input_query>
+<expansion>
+Connect 507(a)(5) concepts to ancestors:
+- "11 U.S.C. 507(a)(5)" AND (("employee benefit plan" /3 (ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act")) OR contributions OR ("180 days" /3 (petition OR cessation)))
+</expansion>
+</example>
+
+<example provision="363(b)">
+<title>sale outside ordinary course</title>
+<input_query>"11 U.S.C. 363(b) sale"</input_query>
+<expansion>
+Connect 363(b) concepts:
+- "11 U.S.C. 363(b)" AND (sale OR sell) AND (("ordinary course" /3 business) OR (notice /3 hearing) OR ("business judgment" /3 rule))
+</expansion>
+</example>
+
+<example provision="727">
+<title>discharge denial with BAPCPA</title>
+<input_query>"11 U.S.C. 727 BAPCPA"</input_query>
+<expansion>
+Connect 727 concepts:
+- "11 U.S.C. 727" AND ((BAPCPA OR B.A.P.C.P.A. OR "Bankruptcy Abuse Prevention and Consumer Protection Act") OR discharge OR ("means test" /3 abuse))
+</expansion>
+</example>
+
+<example provision="503">
+<title>administrative expense with WARN Act</title>
+<input_query>"warn act claims under 11 U.S.C. 503"</input_query>
+<expansion>
+Connect 503 concepts:
+- "11 U.S.C. 503" AND ((WARN OR W.A.R.N. OR "Worker Adjustment and Retraining Notification") /5 (Act OR claims)) AND (administrative /3 (expense OR priority))
+</expansion>
+</example>
+
+<example provision="29 U.S.C. 1001">
+<title>ERISA in bankruptcy context</title>
+<input_query>"29 U.S.C. 1001 ERISA bankruptcy"</input_query>
+<expansion>
+Connect ERISA concepts:
+- "29 U.S.C. 1001" AND ((ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act") /5 (bankruptcy OR "pension plan" OR "benefit plan"))
+</expansion>
+</example>
 </provision_examples>
 
 <query_examples>
