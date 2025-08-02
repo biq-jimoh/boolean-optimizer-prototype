@@ -118,14 +118,14 @@ If no terms meet this extremely high bar (which is usually the case), make NO ex
 CORRECT:
 - (cash /3 collateral)
 - (ordinary /3 course)
-- (personally /3 identifiable /3 information)
+- (hinder /3 delay /3 defraud)
 - (lack /3 adequate! /3 protect!)
-- (federal /3 trade /3 commission)
+- (business /3 judgment /3 rule)
 
 INCORRECT:
 - cash /3 collateral  (missing parentheses)
 - ordinary /3 course  (missing parentheses)
-- (personally /3 identifiable) /3 information  (incorrect nesting)
+- (hinder /3 delay) /3 defraud  (incorrect nesting)
 </examples>
 <reason>
 Parentheses ensure the proximity expression is evaluated as a unit before combining with OR operators.
@@ -249,13 +249,7 @@ Your task:
 1. Identify if the query contains statute citations
 2. If statute text is provided (marked with "FETCHED STATUTE TEXTS"), extract salient concepts for EACH citation
 3. Extract ONLY salient keywords/phrases specific to the exact provision cited
-4. When extracting terms, check if they are acronyms OR full forms with established acronyms:
-   - If extracting an acronym: include (acronym OR acronym with periods OR "full form")
-   - If extracting a full form that has a known acronym: include (acronym OR acronym with periods OR "full form")
-   - Group all variations in parentheses for proper operator precedence
-   Examples:
-   - If statute mentions EPA: (EPA OR E.P.A. OR "Environmental Protection Agency")
-   - If statute mentions "National Labor Relations Board": (NLRB OR N.L.R.B. OR "National Labor Relations Board")
+4. Extract salient keywords and phrases from the statute text
 5. Connect terms to ANCESTOR citations (not the citation being searched)
    EXCEPTION: Section-level queries may use standalone terms if defined in/unique to that section
 6. ALWAYS wrap multi-word proximity expressions in parentheses: (word1 /3 word2)

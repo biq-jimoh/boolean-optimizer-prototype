@@ -81,7 +81,7 @@ class BankruptcyQueryOptimizer:
                  consultants_dir: str = "prompts/consultants", 
                  executive_path: str = "prompts/executive/executive-agent.txt",
                  model: str = "gpt-4.1",
-                 temperature: float = 0.1,
+                 temperature: float = 0.0,
                  enable_logging: bool = True,
                  brave_api_key: Optional[str] = None):
         self.consultants_dir = Path(consultants_dir)
@@ -581,6 +581,87 @@ Example response without recommendations:
                 "structured_output": None
             }
     
+    async def _apply_acronym_review(self, consultant_result: Dict[str, Any], original_query: str) -> Dict[str, Any]:
+        """
+        Apply acronym review to SI-7 and SI-8 recommendations.
+        """
+        # Only process SI-7 and SI-8
+        if consultant_result['consultant'] not in ['SI-7-Statute-Citation-to-Core-Concept-Expansion', 
+                                                  'SI-8-Case-Citation-to-Core-Concept-Expansion']:
+            return consultant_result
+        
+        if not consultant_result.get('has_recommendations'):
+            return consultant_result
+        
+        # Load the review agent if not already loaded
+        if not hasattr(self, 'acronym_review_agent'):
+            review_prompt_path = self.consultants_dir / 'RI-1-Review-Acronym-Expansion.txt'
+            if not review_prompt_path.exists():
+                self._log("RI-1 review consultant not found, skipping acronym review")
+                return consultant_result
+            
+            try:
+                # Load the review consultant
+                with open(review_prompt_path, 'r') as f:
+                    original_instructions = f.read()
+                
+                # Inject mandatory formatting requirements
+                requirements_path = Path("prompts/shared/mandatory_formatting_requirements.txt")
+                requirements_content = ""
+                if requirements_path.exists():
+                    with open(requirements_path, 'r') as f:
+                        requirements_content = f.read()
+                
+                if requirements_content and "{{MANDATORY_FORMATTING_REQUIREMENTS}}" in original_instructions:
+                    original_instructions = original_instructions.replace(
+                        "{{MANDATORY_FORMATTING_REQUIREMENTS}}",
+                        requirements_content
+                    )
+                
+                # Enhance instructions for structured output
+                enhanced_instructions = f"""{original_instructions}
+
+IMPORTANT: You must respond with a structured JSON output containing:
+- has_recommendations: boolean (true if you have recommendations, false otherwise)
+- recommendations: array of recommendation objects, each with:
+  - original: the text to be changed
+  - replacement: what it should be changed to  
+  - reason: brief explanation
+- summary: optional message (especially if no recommendations)"""
+                
+                self.acronym_review_agent = Agent(
+                    name='RI-1-Review-Acronym-Expansion',
+                    instructions=enhanced_instructions,
+                    model=self.model,
+                    model_settings=self.model_settings,
+                    output_type=ConsultantOutput  # Structured output
+                )
+                self._log("Loaded RI-1 review consultant for acronym expansion")
+            except Exception as e:
+                self._log(f"Error loading RI-1 review consultant: {e}")
+                return consultant_result
+        
+        # Pass recommendations through the review
+        review_input = f"""
+Original query: {original_query}
+
+Recommendations to review:
+{consultant_result['recommendations']}
+"""
+        
+        try:
+            review_result = await self.run_consultant(self.acronym_review_agent, review_input)
+            
+            if review_result['has_recommendations']:
+                # Replace the recommendations with the enhanced version
+                consultant_result['recommendations'] = review_result['recommendations']
+                self._log(f"Enhanced {consultant_result['consultant']} with acronym expansions")
+            
+            return consultant_result
+        except Exception as e:
+            self._log(f"Error in acronym review: {e}")
+            return consultant_result  # Return original if review fails
+    
     async def optimize_query(self, query: str, max_concurrent: int = 10) -> Dict[str, Any]:
         """
         Main method to optimize a query using all consultants and the executive.
@@ -658,6 +739,13 @@ Example response without recommendations:
             if delayed_tasks:
                 self._log(f"Running {len(delayed_tasks)} delayed consultants with enhanced content")
                 delayed_results = await asyncio.gather(*delayed_tasks)
+                
+                # Apply acronym review to SI-7/SI-8 results
+                reviewed_results = []
+                for result in delayed_results:
+                    reviewed_result = await self._apply_acronym_review(result, query)
+                    reviewed_results.append(reviewed_result)
+                delayed_results = reviewed_results
             else:
                 self._log("No delayed consultants to run (no web content found)")
         

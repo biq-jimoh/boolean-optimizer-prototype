@@ -48,7 +48,7 @@ def test_optimizer_initialization():
     try:
         optimizer = BankruptcyQueryOptimizer(
             model="gpt-4.1",
-            temperature=0.1,
+            temperature=0.0,
             enable_logging=False
         )
         

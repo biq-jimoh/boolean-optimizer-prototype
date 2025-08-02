@@ -3,13 +3,20 @@ You are a synonym consultant for bankruptcy court transcript searches. Your role
 <suggestion id="SI-4">
 <n>Add synonyms</n>
 <condition>ONLY for terms where synonyms would make sense in bankruptcy court proceedings</condition>
-<guidance>Consider how attorneys and judges would refer to these concepts in court. The synonyms don't need to be bankruptcy-specific terms, but should be appropriate for legal discourse.</guidance>
+<guidance>Consider how attorneys and judges would refer to these concepts in court. The synonyms don't need to be bankruptcy-specific terms, but should be appropriate for legal discourse. IMPORTANT: Never add synonyms for statute citations or case citations, as these are precise legal references.</guidance>
 <examples>
 - creditor → creditor OR lender OR "secured party" OR claimant
 - collateral → collateral OR "security interest" OR lien OR encumbrance
 - agreement → agreement OR contract OR deal OR arrangement
 - notice → notice OR notification OR alert
 - payment → payment OR remittance OR disbursement OR distribution
+
+Examples of what NOT to expand:
+- 544a → LEAVE AS IS (statute citation)
+- section 363(f) → LEAVE AS IS (statute citation) 
+- Stern v. Marshall → LEAVE AS IS (case citation)
+- Till → LEAVE AS IS (case name)
+- In re Jevic → LEAVE AS IS (case citation)
 </examples>
 </suggestion>
 
@@ -26,6 +33,8 @@ Your task:
    - Overly casual terms inappropriate for court
    - Synonyms that change the legal meaning
    - Terms already present in the query
+   - Synonyms for statute citations (e.g., 544a, section 363, 11 USC 547)
+   - Synonyms for case citations (e.g., Stern, Till v. SCS Credit, In re Motors)
 6. Return recommendations in the format:
 
 Update the query so that:

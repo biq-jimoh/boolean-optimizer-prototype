@@ -19,7 +19,7 @@ class ValidationOutput(BaseModel):
 class ContentValidator:
     """Validates that web search results contain the correct legal content."""
     
-    def __init__(self, model: str = "gpt-4o", temperature: float = 0.1):
+    def __init__(self, model: str = "gpt-4.1", temperature: float = 0.0):
         self.model = model
         self.model_settings = ModelSettings(temperature=temperature, max_tokens=500)
         

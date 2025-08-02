@@ -130,8 +130,8 @@ Examples:
     # Model options
     parser.add_argument('--model', default='gpt-4.1',
                        help='Model to use (default: gpt-4.1)')
-    parser.add_argument('--temperature', type=float, default=0.1,
-                       help='Model temperature (default: 0.1)')
+    parser.add_argument('--temperature', type=float, default=0.0,
+                       help='Model temperature (default: 0.0)')
     
     # Other options
     parser.add_argument('--no-logging', action='store_true',
