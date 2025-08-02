@@ -63,7 +63,10 @@ MANDATORY PATTERNS:
 - Proximity with root extenders: MUST use parentheses: (file! /3 motion!)
 - Chains of proximity: (word1 /3 word2 /3 word3) - single set of outer parentheses
 - Hyphenated terms: MUST include all three variations (roll-up OR rollup OR "roll up")
-- Acronyms: MUST include periods and expanded forms (DIP OR D.I.P. OR "debtor in possession")
+- Acronyms: MUST include periods and expanded forms ONLY for established/recognized acronyms
+  - From acronym: DIP → DIP OR D.I.P. OR "debtor in possession"
+  - From full form with known acronym: "Internal Revenue Service" → IRS OR I.R.S. OR "Internal Revenue Service"
+  - Do NOT create acronyms that don't exist in common usage
 - Contractions: MUST include both forms (can't OR cannot OR "can not")
 - Related variations: MUST be grouped with parentheses
 
