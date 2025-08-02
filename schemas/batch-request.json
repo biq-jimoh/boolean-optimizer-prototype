@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Batch Optimize Request Schema",
+  "type": "object",
+  "properties": {
+    "queries": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      },
+      "minItems": 1,
+      "maxItems": 10,
+      "description": "Array of bankruptcy queries to optimize"
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 4,
+          "description": "Specific version to return (1-4) or null for all versions"
+        },
+        "include_changes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to include detailed change information"
+        },
+        "enable_web_search": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to enable web search for SI-7 and SI-8 consultants"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["queries"],
+  "additionalProperties": false
+}

@@ -1,0 +1,190 @@
+service: bankruptcy-query-optimizer
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  timeout: 300  # 5 minutes timeout
+  memorySize: 3008  # 3GB memory for better performance
+  
+  # Environment variables
+  environment:
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    BRAVE_SEARCH_API_KEY: ${env:BRAVE_SEARCH_API_KEY, ''}
+    CONSULTANTS_DIR: prompts/consultants
+    EXECUTIVE_PATH: prompts/executive/executive-agent.txt
+    MODEL: ${env:MODEL, 'gpt-4.1'}
+    TEMPERATURE: ${env:TEMPERATURE, '0.0'}
+    LOG_LEVEL: ${env:LOG_LEVEL, 'INFO'}
+  
+  # IAM role statements
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource: 
+            - arn:aws:secretsmanager:${self:provider.region}:*:secret:bankruptcy-optimizer/*
+
+  # API Gateway configuration
+  apiGateway:
+    restApiId: !Ref ApiGatewayRestApi
+    restApiRootResourceId: !GetAtt ApiGatewayRestApi.RootResourceId
+    # Enable API key requirement
+    apiKeys:
+      - name: ${self:service}-${self:provider.stage}-key
+    usagePlan:
+      - name: ${self:service}-${self:provider.stage}-usage-plan
+        quota:
+          limit: 10000
+          period: MONTH
+        throttle:
+          rateLimit: 10
+          burstLimit: 20
+
+# Package configuration
+package:
+  patterns:
+    - '!**/*'
+    - 'lambda_handler.py'
+    - 'bankruptcy_query_optimizer.py'
+    - 'citation_detector.py'
+    - 'brave_search_service.py'
+    - 'content_validator.py'
+    - 'content_extractor.py'
+    - 'url_cleaner.py'
+    - 'token_budget.py'
+    - 'prompts/**'
+    - 'requirements-lambda.txt'
+
+functions:
+  optimize:
+    # Use container image
+    image:
+      name: appimage
+      # Build args for docker
+      command:
+        - lambda_handler.lambda_handler
+    events:
+      # POST /optimize
+      - http:
+          path: optimize
+          method: post
+          cors: true
+          private: true  # Requires API key
+          request:
+            schemas:
+              application/json: ${file(schemas/optimize-request.json)}
+      
+      # POST /optimize/batch      
+      - http:
+          path: optimize/batch
+          method: post
+          cors: true
+          private: true
+          request:
+            schemas:
+              application/json: ${file(schemas/batch-request.json)}
+      
+      # GET /health
+      - http:
+          path: health
+          method: get
+          cors: true
+          private: false  # Health check doesn't require API key
+      
+      # GET /consultants
+      - http:
+          path: consultants
+          method: get
+          cors: true
+          private: true
+    
+    # Provisioned concurrency for better cold start performance
+    provisionedConcurrency: ${env:PROVISIONED_CONCURRENCY, '0'}
+    
+    # Reserved concurrency to prevent runaway scaling
+    reservedConcurrency: ${env:RESERVED_CONCURRENCY, '100'}
+
+# Custom resources
+resources:
+  Resources:
+    # API Gateway
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}-${self:provider.stage}
+        Description: Bankruptcy Query Optimizer API
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+        
+    # CloudWatch Log Group with retention
+    OptimizeLambdaLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/lambda/${self:service}-${self:provider.stage}-optimize
+        RetentionInDays: 30
+    
+    # API Gateway account configuration for logging
+    ApiGatewayAccount:
+      Type: AWS::ApiGateway::Account
+      Properties:
+        CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchRole.Arn
+    
+    # IAM role for API Gateway CloudWatch logging
+    ApiGatewayCloudWatchRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - apigateway.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+
+  # Stack outputs
+  Outputs:
+    ApiUrl:
+      Description: API Gateway endpoint URL
+      Value: !Sub 'https://${ApiGatewayRestApi}.execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}'
+      Export:
+        Name: ${self:service}-${self:provider.stage}-ApiUrl
+    
+    ApiKeyId:
+      Description: API Key ID
+      Value: !Ref ApiGatewayApiKey1
+      Export:
+        Name: ${self:service}-${self:provider.stage}-ApiKeyId
+
+# Plugins for enhanced functionality
+plugins:
+  - serverless-python-requirements  # For requirements packaging
+  - serverless-api-gateway-throttling  # For rate limiting
+
+custom:
+  # Python requirements configuration
+  pythonRequirements:
+    dockerizePip: true
+    layer: false  # Include in deployment package
+    fileName: requirements-lambda.txt
+    
+  # API Gateway throttling settings
+  apiGatewayThrottling:
+    maxRequestsPerSecond: 10
+    maxConcurrentRequests: 20

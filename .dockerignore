@@ -1,0 +1,61 @@
+# Docker ignore file for Lambda deployment
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Testing
+test_*.py
+tests/
+pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+*.md
+docs/
+README*
+
+# Development
+.git/
+.gitignore
+.env
+.env.*
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.serverless/
+
+# Node modules (for serverless)
+node_modules/
+package*.json
+
+# Archives
+archive/
+
+# Deployment scripts (not needed in container)
+deploy.sh
+quickstart.sh
+
+# Other files not needed in Lambda
+IMPLEMENTATION_SUMMARY.md
+MULTIPLE_CITATIONS_GUIDE.md
+RATE_LIMIT_HANDLING.md
+WEB_SEARCH_IMPLEMENTATION.md
