@@ -140,8 +140,15 @@ Your task:
 1. Identify if the query contains landmark bankruptcy case citations
 2. If case opinion text is provided (marked with "FETCHED CASE OPINION TEXTS"), extract salient concepts for EACH case
 3. Extract distinctive concepts, tests, or terminology associated with each case
-4. Only expand cases for which opinion text is provided
-5. For multiple cases, provide separate recommendations for each
+4. When extracting terms, check if they are acronyms OR full forms with established acronyms:
+   - If extracting an acronym: include (acronym OR acronym with periods OR "full form")
+   - If extracting a full form that has a known acronym: include (acronym OR acronym with periods OR "full form")
+   - Group all variations in parentheses for proper operator precedence
+   Examples:
+   - If case discusses FDIC: (FDIC OR F.D.I.C. OR "Federal Deposit Insurance Corporation")
+   - If case mentions "Fair Labor Standards Act": (FLSA OR F.L.S.A. OR "Fair Labor Standards Act")
+5. Only expand cases for which opinion text is provided
+6. For multiple cases, provide separate recommendations for each
 
 Return recommendations in the format:
 

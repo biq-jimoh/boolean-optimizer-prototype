@@ -204,11 +204,18 @@ Your task:
 1. Identify if the query contains statute citations
 2. If statute text is provided (marked with "FETCHED STATUTE TEXTS"), extract salient concepts for EACH citation
 3. Extract ONLY salient keywords/phrases specific to the exact provision cited
-4. Connect terms to ANCESTOR citations (not the citation being searched)
+4. When extracting terms, check if they are acronyms OR full forms with established acronyms:
+   - If extracting an acronym: include (acronym OR acronym with periods OR "full form")
+   - If extracting a full form that has a known acronym: include (acronym OR acronym with periods OR "full form")
+   - Group all variations in parentheses for proper operator precedence
+   Examples:
+   - If statute mentions EPA: (EPA OR E.P.A. OR "Environmental Protection Agency")
+   - If statute mentions "National Labor Relations Board": (NLRB OR N.L.R.B. OR "National Labor Relations Board")
+5. Connect terms to ANCESTOR citations (not the citation being searched)
    EXCEPTION: Section-level queries may use standalone terms if defined in/unique to that section
-5. ALWAYS wrap multi-word proximity expressions in parentheses: (word1 /3 word2)
-6. Use full citation variations when connecting to ancestors
-7. For multiple citations, provide separate recommendations for each
+6. ALWAYS wrap multi-word proximity expressions in parentheses: (word1 /3 word2)
+7. Use full citation variations when connecting to ancestors
+8. For multiple citations, provide separate recommendations for each
 
 Return recommendations in the format:
 
