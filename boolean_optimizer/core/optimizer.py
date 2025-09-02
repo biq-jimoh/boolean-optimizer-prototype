@@ -140,17 +140,9 @@ class BankruptcyQueryOptimizer:
         
         # Load consultant agents with structured output
         consultant_files = sorted(self.consultants_dir.glob("*.txt"))
-        # Skip disabled consultants (AC-2 hyphenation variations, AC-7 contraction variations)
-        disabled_consultant_prefixes = {
-            "AC-2-Add-hyphenation-variations",
-            "AC-7-Add-contraction-variations",
-        }
         self._log(f"Found {len(consultant_files)} consultant prompt files")
         
         for prompt_file in consultant_files:
-            if prompt_file.stem in disabled_consultant_prefixes:
-                self._log(f"Skipping disabled consultant: {prompt_file.stem}")
-                continue
             try:
                 with open(prompt_file, 'r') as f:
                     original_instructions = f.read()
