@@ -55,7 +55,7 @@ Main endpoint for query optimization.
   },
   "execution_time": "2.34s",
   "active_consultants": 14,
-  "total_consultants": 16
+  "total_consultants": 14
 }
 ```
 

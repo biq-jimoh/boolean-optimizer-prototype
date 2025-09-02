@@ -18,7 +18,7 @@ Examples:
 ```
 
 ### 2. Token Budget Management
-With GPT-4.1's 1M token context window, we allocate 750K tokens for legal texts:
+With large model context windows (e.g., gpt-5), we allocate 750K tokens for legal texts:
 - **Per-statute limit**: 50K tokens (~200 pages)
 - **Per-case limit**: 100K tokens (~400 pages)
 - **Dynamic allocation**: Cases get 2x the weight of statutes

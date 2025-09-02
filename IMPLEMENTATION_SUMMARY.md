@@ -11,7 +11,7 @@ I've successfully implemented a complete Bankruptcy Query Optimizer system using
   - `ConsultantRecommendation` - Individual recommendations
   - `ExecutiveOutput` - Final synthesized output with 4 versions
   - `QueryVersion` - Each optimized version with changes tracked
-- **Parallel execution** of 16 consultant agents using asyncio
+- **Parallel execution** of 14 consultant agents using asyncio
 - **Concurrency control** with configurable semaphore
 - **Comprehensive error handling** and logging
 
@@ -24,14 +24,13 @@ A full-featured CLI tool with:
 - Verbose mode for debugging
 - Configurable model and temperature
 
-### 3. Interactive Demo (`demo_optimizer.py`)
-An interactive demonstration with:
-- Single query optimization demo
-- Batch processing demo
-- Detailed consultant analysis
-- Export to JSON functionality
-- Custom query input
-- Performance statistics
+### 3. Command Line Interface (CLI)
+Use the CLI for local runs and demos:
+- Single query optimization
+- Batch processing from files
+- Version-specific output (show only v1, v2, v3, or v4)
+- JSON output format
+- Verbose mode for debugging
 
 ### 4. Testing Suite (`test_optimizer.py`)
 Basic tests covering:
@@ -44,8 +43,6 @@ Basic tests covering:
 ### 5. Additional Files
 - **requirements.txt** - Python dependencies
 - **README.md** - Comprehensive documentation
-- **example_usage.py** - Simple usage examples
-- **check_setup.py** - Setup verification tool
 
 ## Key Features Implemented
 
@@ -57,7 +54,7 @@ Both consultants and the executive use structured Pydantic models, ensuring:
 - Type safety and validation
 
 ### 2. Parallel Processing
-All 16 consultant agents run simultaneously with:
+All 14 consultant agents run simultaneously with:
 - Configurable concurrency limits
 - Semaphore-based rate limiting
 - Async/await throughout
@@ -94,8 +91,8 @@ python3 optimize_query.py -v 3 "section 363 sale"
 # Process file
 python3 optimize_query.py -f queries.txt
 
-# Interactive demo
-python3 demo_optimizer.py
+# JSON output
+python3 optimize_query.py --json "Till v. SCS Credit"
 ```
 
 ### Python API
@@ -126,9 +123,9 @@ To start using the system:
    pip install -r requirements.txt
    ```
 
-2. Verify setup:
+2. Verify setup by running a simple query locally:
    ```bash
-   python3 check_setup.py
+   python3 optimize_query.py "test query"
    ```
 
 3. Run a test query:

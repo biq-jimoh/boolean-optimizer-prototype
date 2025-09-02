@@ -20,7 +20,7 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
 
 3. **ContentValidator** (`content_validator.py`)
    - Uses Agent SDK to validate search results using raw HTML
-   - Leverages GPT-4.1's 1M token context window
+   - Leverages large-context models (e.g., gpt-5)
    - Analyzes HTML structure to find specific provisions
 
 4. **ContentExtractor** (`content_extractor.py`)
@@ -59,7 +59,7 @@ This implementation adds web search capability to the SI-7 (Statute Citation) an
 
 ### Raw HTML Validation
 
-The system now uses raw HTML for validation, taking advantage of GPT-4.1's massive context window:
+The system now uses raw HTML for validation, taking advantage of large model context windows:
 
 1. **Full Context**: The entire HTML page (typically 70-100KB) is sent to the validator
 2. **Structure-Aware**: The validator can see HTML elements like `<a name="a">` for subsections
@@ -83,28 +83,22 @@ Get your Brave Search API key at: https://api.search.brave.com/app/keys
 
 ### Graceful Degradation
 
-If `BRAVE_SEARCH_API_KEY` is not provided:
-- SI-7 and SI-8 will still run but without web content
-- They will use their internal knowledge as before
-- A warning is logged but the system continues to function
+If `BRAVE_SEARCH_API_KEY` is not provided or no valid content is retrieved:
+- SI-7 and SI-8 are skipped to avoid uninformed expansions
+- Other consultants still run and produce results
+- A warning is logged and the system continues to function
 
 ## Testing
 
-Run the test script to verify the implementation:
+You can validate behavior using the local CLI or lambda-local tests, for example:
 
 ```bash
-python test_web_search.py
+# CLI example
+python optimize_query.py "section 544(a) financing"
+
+# Lambda-local happy path
+python test_lambda_local.py optimize_simple
 ```
-
-**Note**: The test script includes a Brave API key for demonstration purposes. For production use, you should:
-1. Remove the hardcoded API key from `test_web_search.py`
-2. Set your own API key in the environment or a `.env` file
-
-The test script includes:
-- Statute citation query test
-- Case citation query test  
-- Mixed citation query test
-- Non-citation query test (verifies no blocking)
 
 ## Example Usage
 
@@ -117,9 +111,9 @@ optimizer = BankruptcyQueryOptimizer(
 )
 
 # Query with various statute formats
-result = optimizer.optimize_query_sync("363a")  # Works!
-result = optimizer.optimize_query_sync("363f3")  # Works!
-result = optimizer.optimize_query_sync("section 363(f)")  # Works!
+result = optimizer.optimize_query_sync("544a")
+result = optimizer.optimize_query_sync("547c2")
+result = optimizer.optimize_query_sync("section 522(f)")
 
 # Query with case citation  
 result = optimizer.optimize_query_sync("Stern v. Marshall")
@@ -130,7 +124,7 @@ result = optimizer.optimize_query_sync("Stern v. Marshall")
 - Web searches add 2-5 seconds to SI-7/SI-8 execution time
 - Other consultants are not affected and run at full speed
 - Failed web searches gracefully fall back to skipping the consultants
-- HTML pages are typically 70-100KB - tiny compared to GPT-4.1's 1M token limit
+- HTML pages are typically 70-100KB and fit comfortably within modern large-context models
 
 ## Security Considerations
 

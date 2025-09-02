@@ -99,7 +99,7 @@ Optimize a single bankruptcy query.
   },
   "execution_time": "2.34s",
   "active_consultants": 14,
-  "total_consultants": 16
+  "total_consultants": 14
 }
 ```
 
@@ -145,7 +145,7 @@ Optimize multiple queries in a single request.
       "optimized_queries": {...},
       "execution_time": "1.23s",
       "active_consultants": 14,
-      "total_consultants": 16,
+      "total_consultants": 14,
       "status": "success"
     },
     {
@@ -175,7 +175,7 @@ Check API health and configuration.
 {
   "status": "healthy",
   "model": "gpt-5",
-  "consultants": 16,
+  "consultants": 14,
   "brave_search_enabled": true
 }
 ```

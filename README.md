@@ -8,7 +8,7 @@ A sophisticated system that uses OpenAI's Agents SDK to optimize Boolean queries
 - **Parallel Processing**: All consultants run simultaneously for fast results
 - **Structured Outputs**: Reliable, consistent results using Pydantic models
 - **4 Optimization Levels**: From basic corrections to comprehensive enhancements
-- **Flexible Usage**: Python API, CLI tool, and interactive demo
+- **Flexible Usage**: Python API and CLI tool
 
 ## Installation
 
@@ -81,18 +81,13 @@ print(result['optimized_queries']['version3']['query'])
 print(result['optimized_queries']['version4']['query'])
 ```
 
-### Interactive Demo
-
-Run the interactive demo to explore all features:
-```bash
-python demo_optimizer.py
-```
+ 
 
 ## How It Works
 
 ### Consultant Agents
 
-The system includes 16 consultant agents, each specializing in different optimization techniques:
+The system includes 14 consultant agents, each specializing in different optimization techniques:
 
 **Automatic Corrections (AC):**
 - AC-1: Fix typos
@@ -212,7 +207,6 @@ python optimize_query.py --verbose "your query"
 bankruptcy-query-optimizer/
 ├── bankruptcy_query_optimizer.py  # Main optimizer implementation
 ├── optimize_query.py             # CLI tool
-├── demo_optimizer.py             # Interactive demo
 ├── requirements.txt              # Python dependencies
 ├── README.md                     # This file
 └── prompts/                      # Prompt templates (required)
