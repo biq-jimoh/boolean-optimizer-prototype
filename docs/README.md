@@ -16,7 +16,7 @@ Key documents:
 
 Run common tasks from repo root:
 
-- Package Lambda: bash scripts/build_lambda_package.sh
+- Package Lambda: bash scripts/build_lambda_package.sh (outputs to build/)
 - Deploy Lambda: bash scripts/deploy.sh --stage prod --region us-east-1
 - Local Lambda test: python scripts/lambda_local_test.py optimize_simple
 - Pytest suite: pytest -q

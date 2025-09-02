@@ -7,7 +7,7 @@ cd "$ROOT_DIR"
 echo "Building Lambda package with Docker for Linux compatibility..."
 
 # Clean up old packages
-rm -rf lambda-package lambda-deployment.zip
+rm -rf build/lambda-package build/lambda-deployment.zip
 
 # Use Docker to build in Lambda-like environment
 docker run --rm \
@@ -16,12 +16,13 @@ docker run --rm \
   public.ecr.aws/lambda/python:3.11 \
   /bin/sh -c "
     echo 'Installing dependencies for Linux...'
-    pip install -r requirements-lambda.txt -t lambda-package/ --upgrade
+    mkdir -p build/lambda-package
+    pip install -r infra/requirements-lambda.txt -t build/lambda-package/ --upgrade
     echo 'Copying application files...'
-    cp *.py lambda-package/
-    cp -r boolean_optimizer lambda-package/
-    cp -r prompts lambda-package/
-    cd lambda-package
+    cp *.py build/lambda-package/
+    cp -r boolean_optimizer build/lambda-package/
+    cp -r prompts build/lambda-package/
+    cd build/lambda-package
     echo 'Cleaning up package...'
     find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
     find . -type f -name '*.pyc' -delete 2>/dev/null || true
@@ -32,4 +33,4 @@ docker run --rm \
   "
 
 echo "Package built successfully!"
-ls -lh lambda-deployment.zip
+ls -lh build/lambda-deployment.zip

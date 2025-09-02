@@ -53,19 +53,15 @@ provider:
           burstLimit: 20
 
 # Package configuration
+# Package section not used for container image; retained minimal config if needed
 package:
   patterns:
     - '!**/*'
     - 'lambda_handler.py'
     - 'bankruptcy_query_optimizer.py'
-    - 'citation_detector.py'
-    - 'brave_search_service.py'
-    - 'content_validator.py'
-    - 'content_extractor.py'
-    - 'url_cleaner.py'
-    - 'token_budget.py'
+    - 'boolean_optimizer/**'
     - 'prompts/**'
-    - 'requirements-lambda.txt'
+    - 'infra/requirements-lambda.txt'
 
 functions:
   optimize:
@@ -84,7 +80,7 @@ functions:
           private: true  # Requires API key
           request:
             schemas:
-              application/json: ${file(schemas/optimize-request.json)}
+              application/json: ${file(../schemas/optimize-request.json)}
       
       # POST /optimize/batch      
       - http:
@@ -94,7 +90,7 @@ functions:
           private: true
           request:
             schemas:
-              application/json: ${file(schemas/batch-request.json)}
+              application/json: ${file(../schemas/batch-request.json)}
       
       # GET /health
       - http:
@@ -182,7 +178,7 @@ custom:
   pythonRequirements:
     dockerizePip: true
     layer: false  # Include in deployment package
-    fileName: requirements-lambda.txt
+    fileName: infra/requirements-lambda.txt
     
   # API Gateway throttling settings
   apiGatewayThrottling:

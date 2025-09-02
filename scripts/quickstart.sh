@@ -26,11 +26,7 @@ fi
 
 # Install dependencies
 echo "Installing dependencies..."
-pip3 install openai-agents pydantic
-
-echo
-echo "Running setup check..."
-python3 check_setup.py
+pip3 install -r requirements.txt
 
 echo
 echo "======================================"
@@ -42,6 +38,7 @@ echo
 echo "======================================"
 echo "Setup complete! You can now use:"
 echo "  python3 optimize_query.py 'your query'"
-echo "  python3 demo_optimizer.py"
-echo "  python3 example_usage.py"
+echo "  python3 optimize_query.py --json 'Till v. SCS Credit'"
+echo "  bash scripts/build_lambda_package.sh"
+echo "  bash scripts/deploy.sh --stage dev"
 echo "======================================"

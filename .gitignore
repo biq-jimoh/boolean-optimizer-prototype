@@ -32,6 +32,8 @@ Thumbs.db
 *.log
 optimization_result_*.json
 .env
+# Build artifacts
+build/
 lambda-package/
 lambda-deployment.zip
 

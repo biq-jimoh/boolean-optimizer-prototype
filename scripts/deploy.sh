@@ -101,7 +101,7 @@ echo ""
 
 # Build Docker image
 echo -e "${YELLOW}Building Docker image...${NC}"
-docker build -t bankruptcy-optimizer:latest .
+docker build -f infra/Dockerfile -t bankruptcy-optimizer:latest .
 if [ $? -ne 0 ]; then
     echo -e "${RED}Docker build failed${NC}"
     exit 1
@@ -112,6 +112,7 @@ echo ""
 # Deploy using Serverless Framework
 echo -e "${YELLOW}Deploying to AWS Lambda...${NC}"
 serverless deploy \
+    --config infra/serverless.yml \
     --stage $STAGE \
     --region $REGION \
     --aws-profile $PROFILE \
@@ -128,10 +129,10 @@ echo ""
 
 # Get deployment information
 echo -e "${YELLOW}Getting deployment information...${NC}"
-serverless info --stage $STAGE --region $REGION --aws-profile $PROFILE
+serverless info --config infra/serverless.yml --stage $STAGE --region $REGION --aws-profile $PROFILE
 
 # Extract API endpoint and key
-API_ENDPOINT=$(serverless info --stage $STAGE --region $REGION --aws-profile $PROFILE | grep "POST" | head -1 | awk '{print $3}')
+API_ENDPOINT=$(serverless info --config infra/serverless.yml --stage $STAGE --region $REGION --aws-profile $PROFILE | grep "POST" | head -1 | awk '{print $3}')
 echo ""
 echo -e "${GREEN}API Endpoint:${NC} $API_ENDPOINT"
 echo ""

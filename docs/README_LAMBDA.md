@@ -38,9 +38,10 @@ This directory contains the AWS Lambda deployment configuration for the Bankrupt
 ```
 .
 ├── lambda_handler.py           # Main Lambda function handler
-├── requirements-lambda.txt     # Lambda-optimized dependencies
-├── Dockerfile                  # Container image for Lambda
-├── serverless.yml             # Serverless Framework configuration
+├── infra/                      # Deployment configuration
+│   ├── requirements-lambda.txt # Lambda-optimized dependencies
+│   ├── Dockerfile              # Container image for Lambda
+│   └── serverless.yml          # Serverless Framework configuration
 ├── scripts/                   # Helper and deployment scripts
 │   ├── deploy.sh              # Deployment automation script
 │   ├── build_lambda_package.sh# Lambda package builder
@@ -100,7 +101,7 @@ The API is built using:
 
 View Lambda logs:
 ```bash
-serverless logs -f optimize --stage prod --tail
+serverless logs --config infra/serverless.yml -f optimize --stage prod --tail
 ```
 
 Key metrics to monitor:
@@ -129,13 +130,13 @@ Based on typical usage:
 
 ```bash
 # View recent logs
-serverless logs -f optimize --stage prod
+serverless logs --config infra/serverless.yml -f optimize --stage prod
 
 # Get function info
-serverless info --stage prod --verbose
+serverless info --config infra/serverless.yml --stage prod --verbose
 
 # Update function code
-serverless deploy function -f optimize --stage prod
+serverless deploy --config infra/serverless.yml function -f optimize --stage prod
 ```
 
 ## 🔄 Updates and Rollbacks
@@ -147,7 +148,7 @@ bash scripts/deploy.sh --stage prod
 
 Rollback to previous version:
 ```bash
-serverless rollback --stage prod
+serverless rollback --config infra/serverless.yml --stage prod
 ```
 
 ## 📝 License

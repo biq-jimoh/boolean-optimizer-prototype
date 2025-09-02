@@ -21,7 +21,7 @@
   - `pytest -q` (unit-style; API-dependent parts skip without `OPENAI_API_KEY`)
   - Script-style: `python tests/test_optimizer.py`, `python scripts/lambda_local_test.py optimize_simple`
 - Lambda packaging/deploy:
-  - `bash scripts/build_lambda_package.sh` → builds `lambda-package/` and zip
+  - `bash scripts/build_lambda_package.sh` → builds artifacts in `build/`
   - `bash scripts/deploy.sh --stage prod --region us-east-1`
 
 ## Coding Style & Naming Conventions

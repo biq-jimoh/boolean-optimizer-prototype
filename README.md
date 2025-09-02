@@ -207,12 +207,13 @@ python optimize_query.py --verbose "your query"
 bankruptcy-query-optimizer/
 ├── bankruptcy_query_optimizer.py  # Main optimizer implementation
 ├── optimize_query.py             # CLI tool
-├── requirements.txt              # Python dependencies
-├── README.md                     # This file
-├── docs/                         # Documentation (non-README)
-├── tests/                        # Pytest suite
-├── scripts/                      # Helper and operational scripts
-└── prompts/                      # Prompt templates (required)
+ ├── requirements.txt              # Python dependencies
+  ├── README.md                     # This file
+  ├── infra/                        # Deployment config (Serverless, Docker, Lambda reqs)
+  ├── docs/                         # Documentation (non-README)
+  ├── tests/                        # Pytest suite
+  ├── scripts/                      # Helper and operational scripts
+  └── prompts/                      # Prompt templates (required)
     ├── consultants/              # Consultant agent prompts
     └── executive/                # Executive agent prompt
 ```
