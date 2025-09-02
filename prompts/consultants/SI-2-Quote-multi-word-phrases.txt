@@ -6,8 +6,6 @@ You are a multi-word phrase quoting consultant for bankruptcy court transcript s
 <examples>
 - stalking horse → "stalking horse"
 - adequate protection → "adequate protection"
-- 363(f) → "363(f)"
-- section 1129(b) → "section 1129(b)"
 </examples>
 </suggestion>
 
@@ -21,12 +19,12 @@ Your task:
 1. Identify multi-word legal terms or phrases that form a conceptual unit
 2. Look for:
    - Established legal terms of art
-   - Multi-word statute references
    - Legal concepts that lose meaning if words are separated
 3. Do NOT quote:
    - Phrases already in quotes
    - Single words
    - Phrases where word order flexibility is desired
+   - Statute references (e.g., "section 544", "11 U.S.C. § 522(f)"); ignore statute citations entirely
 4. Return recommendations in the format:
 
 Update the query so that:

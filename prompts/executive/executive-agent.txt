@@ -12,7 +12,8 @@ IMPORTANT: Only apply corrections and suggestions that are appropriate and relev
 <title>AVOID REDUNDANCY</title>
 <description>Never add search terms that are already covered:</description>
 <examples>
-- If searching for "section 363", do NOT add standalone "363" as it's redundant
+- If input includes a statute label (e.g., "section 544"), normalize to the bare section: 544 (unquoted); do not keep label variants
+- If searching for a bare section number like 544, do NOT add "section 544" or "§ 544"; keep the bare number per AC-5
 - If searching for "stalking horse" as a phrase, do NOT add "stalking" or "horse" separately
 - If a term appears in a phrase, don't add it separately (e.g., if you have "bankruptcy filing", don't add "filing" alone)
 - Only add broader/narrower variations if they capture different uses
@@ -25,8 +26,8 @@ IMPORTANT: Only apply corrections and suggestions that are appropriate and relev
 - Multi-word phrases MUST be quoted: "secured party" not secured party
 - Terms with common endings MUST use root extenders: file! not file, object! not object
 - When adding single words that can have variations, use root extenders
-- Statute citations must follow AC-5 format with all variations
-- Hyphenated terms must include their variations per AC-2
+- Statute citations must be normalized per AC-5 to bare sections (quote parenthetical; include compressed). Never quote bare numeric tokens; quote only parenthetical forms (e.g., "522(f)") and include compressed (e.g., 522f) where applicable
+- For bare section inputs (e.g., 544), do NOT add label/symbol variants ("section 544" or "§ 544"); keep the bare number
 </examples>
 </rule_2>
 
@@ -43,7 +44,7 @@ IMPORTANT: Only apply corrections and suggestions that are appropriate and relev
 <title>NO INVENTED RULES</title>
 <description>Apply ONLY the corrections and suggestions explicitly defined in this document:</description>
 <allowed_rules>
-- Automatic Corrections: AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, AC-7
+- Automatic Corrections: AC-1, AC-3, AC-4, AC-5, AC-6
 - Base Suggestions: SI-1, SI-2, SI-3, SI-5, SI-9
 - Broadening Suggestions: SI-4, SI-7, SI-8
 - Narrowing Suggestion: SI-6
@@ -91,8 +92,8 @@ IMPORTANT: Only apply corrections and suggestions that are appropriate and relev
 <examples>
 - "debtor AND creditor" searches for the phrase with the word "AND"
 - To use the AND operator: debtor AND creditor
-- "section 363 OR 547" searches for that exact phrase
-- To use the OR operator: "section 363" OR "section 547"
+- "section 547 OR 522" searches for that exact phrase
+- To use the OR operator: "section 547" OR "section 522"
 - "file!" searches for the literal text "file!" with the exclamation mark
 - To use the root extender: file! (captures file, filed, filing, files)
 - "licen*e" searches for the literal text "licen*e" with the asterisk
@@ -140,12 +141,10 @@ When multiple operators could apply, use only the most appropriate one:
 <consultant_overview>
 AUTOMATIC CORRECTIONS (Always evaluate):
 - AC-1: Fix typos - Corrects misspellings
-- AC-2: Add hyphenation variations - Adds variations for hyphenated terms
 - AC-3: Expand acronyms - Adds full forms of bankruptcy-related acronyms
 - AC-4: Quote statute citations - Ensures statute citations are quoted
-- AC-5: Add statute citation variations - Creates comprehensive patterns for statutes
+- AC-5: Normalize statute citations - Bare sections with parenthetical + compressed (quote parenthetical)
 - AC-6: Convert case names to proximity format - Uses +1 operator for case names
-- AC-7: Add contraction variations - Handles contractions and expanded forms
 
 BASE SUGGESTIONS (Apply after corrections):
 - SI-1: Add root extenders - Adds ! to capture word variations
@@ -177,7 +176,7 @@ When consultant recommendations conflict:
 <version_building_rules>
 <constraint>ONLY apply the specific corrections and suggestions listed below. Do NOT create, invent, or combine rules that are not explicitly defined.</constraint>
 
-<version1>Apply ONLY corrections AC-1, AC-2, AC-3, AC-4, AC-5, AC-6, and AC-7 where their specific conditions are met. No other transformations.</version1>
+<version1>Apply ONLY corrections AC-1, AC-3, AC-4, AC-5, and AC-6 where their specific conditions are met. No other transformations.</version1>
 
 <version2>Start with version1, then apply ONLY suggestions SI-1, SI-2, SI-3, SI-5, and SI-9 where their specific conditions are met. No other additions.</version2>
 
@@ -212,7 +211,7 @@ When consultant recommendations conflict:
 Return a JSON object with this exact structure:
 {
   "version1": {
-    "allowed_rules": ["AC-1", "AC-2", "AC-3", "AC-4", "AC-5", "AC-6", "AC-7"],
+    "allowed_rules": ["AC-1", "AC-3", "AC-4", "AC-5", "AC-6"],
     "query": "the query with ONLY the allowed auto-corrections applied",
     "changes": [
       {
@@ -260,11 +259,6 @@ Return a JSON object with this exact structure:
 Example changes format:
 "changes": [
   {
-    "rule_id": "AC-2",
-    "rule_name": "Add hyphenation variations",
-    "change": "Added variations for 'roll-up' including rollup and 'roll up'"
-  },
-  {
     "rule_id": "SI-1",
     "rule_name": "Add root extenders",
     "change": "Added root extender to 'confirm' to capture confirmed, confirming, confirmation"
@@ -272,7 +266,7 @@ Example changes format:
   {
     "rule_id": "SI-7",
     "rule_name": "Statute Citation to Core Concept Expansion",
-    "change": "Added core concepts 'stalking horse' and '363 sale' related to section 363"
+    "change": "Added core concepts 'assumption' and 'cure payment' related to section 365"
   },
   {
     "rule_id": "SI-8",
@@ -299,7 +293,7 @@ IMPORTANT: Return ONLY valid JSON. Do not include any text outside the JSON stru
 <execution_steps>
 1. Receive the input query
 2. Analyze query to identify applicable consultants
-3. For Version 1: Apply AC-1 through AC-7 consultants
+3. For Version 1: Apply AC-1, AC-3, AC-4, AC-5, and AC-6 consultants
 4. For Version 2: Add SI-1, SI-2, SI-3, SI-5, SI-9 consultants
 5. For Version 3: Add SI-4, SI-7, SI-8 consultants  
 6. For Version 4: Add SI-6 consultant

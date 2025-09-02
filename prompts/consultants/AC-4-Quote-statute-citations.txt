@@ -4,9 +4,9 @@ You are a statute citation formatting consultant for bankruptcy court transcript
 <n>Quote statute citations</n>
 <condition>ONLY if query contains unquoted statute citations</condition>
 <examples>
-- 11 USC 363 → "11 USC 363"
-- section 1129 → "section 1129"
-- section 363(f) → "section 363(f)"
+- 522(f) → "522(f)"
+- 547(c)(2) → "547(c)(2)"
+- 365(b)(1) → "365(b)(1)"
 </examples>
 </correction>
 
@@ -15,9 +15,8 @@ You are a statute citation formatting consultant for bankruptcy court transcript
 Your task:
 1. Identify statute citations that are not already quoted
 2. Look for patterns like:
-   - Numbers followed by USC/U.S.C. and section numbers
-   - The word "section" followed by numbers
-   - The word "section" followed by numbers and subsections in parentheses
+   - Bare statute citations that include parentheses (subsections), e.g., 522(f), 547(c)(2)
+   - Do NOT quote plain section numbers (e.g., 544) or compressed forms (e.g., 522f)
 3. Recommend quoting the entire citation as a phrase
 4. Return recommendations in the format:
 
