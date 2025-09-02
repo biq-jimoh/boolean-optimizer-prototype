@@ -7,7 +7,7 @@ from typing import Optional
 import httpx
 import asyncio
 from urllib.parse import urlparse
-from token_budget import TokenBudgetConfig
+from boolean_optimizer.core.token_budget import TokenBudgetConfig
 
 # Try to import Playwright, but don't fail if it's not available
 try:

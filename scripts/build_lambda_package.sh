@@ -19,6 +19,7 @@ docker run --rm \
     pip install -r requirements-lambda.txt -t lambda-package/ --upgrade
     echo 'Copying application files...'
     cp *.py lambda-package/
+    cp -r boolean_optimizer lambda-package/
     cp -r prompts lambda-package/
     cd lambda-package
     echo 'Cleaning up package...'

@@ -3,7 +3,7 @@
 Test script to demonstrate exponential backoff handling for 429 errors.
 """
 import asyncio
-from brave_search_service import BraveSearchService
+from boolean_optimizer.services.brave_search import BraveSearchService
 
 
 async def test_backoff():

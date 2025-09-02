@@ -1,11 +1,4 @@
-"""
-Compatibility shim for package reorganization.
-
-Exports the primary classes from the new package layout so existing imports
-`from bankruptcy_query_optimizer import ...` continue to work.
-"""
-
-from boolean_optimizer.core.optimizer import (
+from .core.optimizer import (
     BankruptcyQueryOptimizer,
     ConsultantOutput,
     ExecutiveOutput,

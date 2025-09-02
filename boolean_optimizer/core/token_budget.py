@@ -117,3 +117,4 @@ class TokenBudgetManager:
                     allocations[key] = min(current + bonus, max_allowed)
         
         return allocations
+        

@@ -145,6 +145,7 @@ Is this the correct statute page?"""
                 confidence=0.0,
                 reason=f"Validation error: {str(e)}"
             )
+        
     
     async def validate_case_result(self, case_info: Dict[str, str], search_result: Dict, page_content: str = None) -> ValidationOutput:
         """

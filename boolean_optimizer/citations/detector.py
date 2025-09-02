@@ -183,3 +183,4 @@ If no case citations are found, return {"found": false, "citations": []}""",
                 'search_format': citation.search_format
             }
         return None
+        

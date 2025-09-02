@@ -55,7 +55,7 @@ async def test_multiple_citations():
 
 async def test_token_budget():
     """Test token budget allocation directly."""
-    from token_budget import TokenBudgetManager
+    from boolean_optimizer.core.token_budget import TokenBudgetManager
     
     manager = TokenBudgetManager()
     
