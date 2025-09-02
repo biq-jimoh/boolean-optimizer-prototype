@@ -21,7 +21,7 @@ This directory contains the AWS Lambda deployment configuration for the Bankrupt
 
 2. **Run the deployment script:**
    ```bash
-   ./deploy.sh --stage prod --region us-east-1
+   bash scripts/deploy.sh --stage prod --region us-east-1
    ```
 
 3. **Test the API:**
@@ -41,8 +41,10 @@ This directory contains the AWS Lambda deployment configuration for the Bankrupt
 ├── requirements-lambda.txt     # Lambda-optimized dependencies
 ├── Dockerfile                  # Container image for Lambda
 ├── serverless.yml             # Serverless Framework configuration
-├── deploy.sh                  # Deployment automation script
-├── test_lambda_local.py       # Local testing script
+├── scripts/                   # Helper and deployment scripts
+│   ├── deploy.sh              # Deployment automation script
+│   ├── build_lambda_package.sh# Lambda package builder
+│   └── lambda_local_test.py   # Local testing script
 ├── schemas/                   # API request validation schemas
 │   ├── optimize-request.json
 │   └── batch-request.json
@@ -58,10 +60,10 @@ Test the Lambda function locally before deployment:
 
 ```bash
 # Test all endpoints
-python test_lambda_local.py
+python scripts/lambda_local_test.py
 
 # Test specific endpoint
-python test_lambda_local.py optimize_simple
+python scripts/lambda_local_test.py optimize_simple
 ```
 
 ## 🔑 API Endpoints
@@ -140,7 +142,7 @@ serverless deploy function -f optimize --stage prod
 
 Update the deployment:
 ```bash
-./deploy.sh --stage prod
+bash scripts/deploy.sh --stage prod
 ```
 
 Rollback to previous version:

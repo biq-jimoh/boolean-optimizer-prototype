@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Ensure we run from repo root
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
+
 echo "Building Lambda package with Docker for Linux compatibility..."
 
 # Clean up old packages

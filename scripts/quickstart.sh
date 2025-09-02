@@ -2,6 +2,10 @@
 
 # Bankruptcy Query Optimizer - Quick Start Script
 
+# Ensure we run from repo root
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
+
 echo "======================================"
 echo "Bankruptcy Query Optimizer Quick Start"
 echo "======================================"

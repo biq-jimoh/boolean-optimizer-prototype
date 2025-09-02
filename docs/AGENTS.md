@@ -8,7 +8,7 @@
 - `prompts/executive/executive-agent.txt`: Executive agent prompt.
 - `prompts/shared/mandatory_formatting_requirements.txt`: Shared rules injected via placeholder.
 - `schemas/*.json`: Request validation for the Lambda API.
-- Tests: `test_*.py` at repo root; utility modules alongside core files.
+- Tests: `tests/test_*.py`; utility modules alongside core files.
 
 ## Build, Test, and Development Commands
 - Create env and install deps:
@@ -19,10 +19,10 @@
   - `python optimize_query.py --json "Till v. SCS Credit"`
 - Run tests:
   - `pytest -q` (unit-style; API-dependent parts skip without `OPENAI_API_KEY`)
-  - Script-style: `python test_optimizer.py`, `python test_lambda_local.py optimize_simple`
+  - Script-style: `python tests/test_optimizer.py`, `python scripts/lambda_local_test.py optimize_simple`
 - Lambda packaging/deploy:
-  - `./build_lambda_package.sh` → builds `lambda-package/` and zip
-  - `./deploy.sh --stage prod --region us-east-1`
+  - `bash scripts/build_lambda_package.sh` → builds `lambda-package/` and zip
+  - `bash scripts/deploy.sh --stage prod --region us-east-1`
 
 ## Coding Style & Naming Conventions
 - Python 3.11, 4-space indentation, PEP 8.

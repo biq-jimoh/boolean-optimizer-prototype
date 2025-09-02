@@ -97,4 +97,4 @@ if __name__ == "__main__":
     
     # Run tests
     asyncio.run(test_backoff())
-    asyncio.run(test_parallel_with_backoff())
+asyncio.run(test_parallel_with_backoff())

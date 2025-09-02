@@ -3,6 +3,10 @@
 # Bankruptcy Query Optimizer - AWS Lambda Deployment Script
 # This script helps deploy the application to AWS Lambda using Serverless Framework
 
+# Ensure we run from repo root
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT_DIR"
+
 set -e  # Exit on error
 
 # Colors for output
@@ -32,7 +36,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --help)
-            echo "Usage: ./deploy.sh [options]"
+            echo "Usage: ./scripts/deploy.sh [options]"
             echo "Options:"
             echo "  --stage <stage>     Deployment stage (default: dev)"
             echo "  --region <region>   AWS region (default: us-east-1)"

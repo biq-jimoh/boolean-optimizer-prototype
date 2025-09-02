@@ -32,6 +32,8 @@ Thumbs.db
 *.log
 optimization_result_*.json
 .env
+lambda-package/
+lambda-deployment.zip
 
 # Pytest
 .pytest_cache/

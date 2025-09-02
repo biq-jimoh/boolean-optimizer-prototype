@@ -209,10 +209,17 @@ bankruptcy-query-optimizer/
 ├── optimize_query.py             # CLI tool
 ├── requirements.txt              # Python dependencies
 ├── README.md                     # This file
+├── docs/                         # Documentation (non-README)
+├── tests/                        # Pytest suite
+├── scripts/                      # Helper and operational scripts
 └── prompts/                      # Prompt templates (required)
     ├── consultants/              # Consultant agent prompts
     └── executive/                # Executive agent prompt
 ```
+
+## Documentation
+
+- See the `docs/` folder for Lambda usage, deployment guides, API docs, agent guidelines, and advanced topics.
 
 ## License
 

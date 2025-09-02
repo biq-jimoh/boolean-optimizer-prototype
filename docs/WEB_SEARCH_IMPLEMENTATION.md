@@ -97,7 +97,7 @@ You can validate behavior using the local CLI or lambda-local tests, for example
 python optimize_query.py "section 544(a) financing"
 
 # Lambda-local happy path
-python test_lambda_local.py optimize_simple
+python scripts/lambda_local_test.py optimize_simple
 ```
 
 ## Example Usage

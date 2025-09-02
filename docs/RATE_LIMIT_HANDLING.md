@@ -69,7 +69,7 @@ Failed to search for statute after 3 retries
 
 Run the test script to see exponential backoff in action:
 ```bash
-python test_exponential_backoff.py
+python scripts/exponential_backoff_demo.py
 ```
 
 This will:

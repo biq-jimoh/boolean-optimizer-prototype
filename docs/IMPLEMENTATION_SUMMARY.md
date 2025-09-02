@@ -32,7 +32,7 @@ Use the CLI for local runs and demos:
 - JSON output format
 - Verbose mode for debugging
 
-### 4. Testing Suite (`test_optimizer.py`)
+### 4. Testing Suite (`tests/test_optimizer.py`)
 Basic tests covering:
 - Pydantic model validation
 - Optimizer initialization
@@ -134,3 +134,4 @@ To start using the system:
    ```
 
 The system is now ready for production use with gpt-5 as specified!
+ 

@@ -1,11 +1,12 @@
 """
 Basic tests for the Bankruptcy Query Optimizer.
-Run with: python test_optimizer.py
+Run with: pytest -q
 """
 
 import asyncio
 import os
 import sys
+import pytest
 from bankruptcy_query_optimizer import BankruptcyQueryOptimizer, ConsultantOutput, ExecutiveOutput
 
 
@@ -41,34 +42,41 @@ def test_consultant_output_model():
     print("✓ ConsultantOutput model tests passed")
 
 
-def test_optimizer_initialization():
-    """Test optimizer initialization."""
-    print("\nTesting optimizer initialization...")
-    
-    try:
-        optimizer = BankruptcyQueryOptimizer(
-            model="gpt-5",
-            temperature=0.0,
-            enable_logging=False
-        )
-        
-        summary = optimizer.get_agent_summary()
-        assert summary['model'] == "gpt-5"
-        assert summary['consultant_count'] > 0
-        assert summary['executive_loaded'] == True
-        
-        print(f"✓ Optimizer initialized successfully")
-        print(f"  - Model: {summary['model']}")
-        print(f"  - Consultants: {summary['consultant_count']}")
-        print(f"  - Consultant names: {', '.join(summary['consultant_names'][:5])}...")
-        
-        return optimizer
-        
-    except Exception as e:
-        print(f"✗ Optimizer initialization failed: {e}")
-        return None
+@pytest.fixture(scope="module")
+def optimizer():
+    """Provide an initialized optimizer, or skip if API key unavailable."""
+    # Load API key from env or .env
+    if not os.getenv("OPENAI_API_KEY"):
+        try:
+            from dotenv import load_dotenv, find_dotenv
+            load_dotenv(find_dotenv(), override=False)
+        except Exception:
+            pass
+    if not os.getenv("OPENAI_API_KEY"):
+        pytest.skip("OPENAI_API_KEY not set; skipping API-dependent tests")
+
+    opt = BankruptcyQueryOptimizer(
+        model="gpt-5",
+        temperature=0.0,
+        enable_logging=False
+    )
+    # Sanity check
+    summary = opt.get_agent_summary()
+    assert summary['model'] == "gpt-5"
+    assert summary['consultant_count'] > 0
+    assert summary['executive_loaded'] is True
+    return opt
 
 
+def test_optimizer_initialization(optimizer):
+    """Test optimizer initialization summary via fixture."""
+    summary = optimizer.get_agent_summary()
+    assert summary['model'] == "gpt-5"
+    assert summary['consultant_count'] > 0
+    assert summary['executive_loaded'] is True
+
+
+@pytest.mark.asyncio
 async def test_single_query_optimization(optimizer):
     """Test optimizing a single query."""
     print("\nTesting query optimization...")
@@ -112,6 +120,7 @@ async def test_single_query_optimization(optimizer):
         return None
 
 
+@pytest.mark.asyncio
 async def test_multiple_queries(optimizer):
     """Test optimizing multiple queries."""
     print("\nTesting multiple query optimization...")
@@ -160,43 +169,7 @@ def test_consultant_recommendation_format():
     print("✓ Consultant recommendation formatting correct")
 
 
-async def run_all_tests():
-    """Run all tests."""
-    print("="*60)
-    print("Bankruptcy Query Optimizer Tests")
-    print("="*60)
-    
-    # Check API key
-    if not os.getenv("OPENAI_API_KEY"):
-        # Fallback: try loading from .env without overriding existing env
-        try:
-            from dotenv import load_dotenv, find_dotenv
-            load_dotenv(find_dotenv(), override=False)
-        except Exception:
-            pass
-    if not os.getenv("OPENAI_API_KEY"):
-        print("\n⚠️  WARNING: OPENAI_API_KEY not set!")
-        print("   API-dependent tests will be skipped.")
-        print("   Set your API key to run full tests.")
-        api_key_available = False
-    else:
-        api_key_available = True
-    
-    # Run model tests (no API needed)
-    test_consultant_output_model()
-    test_consultant_recommendation_format()
-    
-    if api_key_available:
-        # Run API-dependent tests
-        optimizer = test_optimizer_initialization()
-        
-        if optimizer:
-            await test_single_query_optimization(optimizer)
-            await test_multiple_queries(optimizer)
-    
-    print("\n" + "="*60)
-    print("Test suite completed!")
-    print("="*60)
+# The remaining script-style runner is unnecessary under pytest and removed.
 
 
 if __name__ == "__main__":

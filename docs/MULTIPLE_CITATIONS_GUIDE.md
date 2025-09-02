@@ -95,7 +95,7 @@ result = await optimizer.optimize_query("363a, 365b, 544a, 547c2, and 522f")
 
 Run the test script to see multiple citations in action:
 ```bash
-python test_multiple_citations.py
+python scripts/multiple_citations_demo.py
 ```
 
 This tests:

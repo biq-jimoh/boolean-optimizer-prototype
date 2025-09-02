@@ -13,7 +13,7 @@ async def test_multiple_citations():
     optimizer = BankruptcyQueryOptimizer(
         consultants_dir="prompts/consultants",
         executive_prompt_path="prompts/executive/executive-agent.txt",
-        model="gpt-4.1"
+        model="gpt-5"
     )
     
     # Test cases
@@ -116,4 +116,4 @@ if __name__ == "__main__":
     # Then test the full system
     print("\n\nTesting Full System with Multiple Citations")
     print("="*80)
-    asyncio.run(test_multiple_citations())
+asyncio.run(test_multiple_citations())
