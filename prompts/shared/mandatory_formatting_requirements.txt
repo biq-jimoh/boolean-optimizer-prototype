@@ -62,12 +62,13 @@ MANDATORY PATTERNS:
 - Legal phrases: PREFER (word1! /3 word2!) over "word1 word2" unless exact form required
 - Proximity with root extenders: MUST use parentheses: (file! /3 motion!)
 - Chains of proximity: (word1 /3 word2 /3 word3) - single set of outer parentheses
-- Hyphenated terms: MUST include all three variations (roll-up OR rollup OR "roll up")
-- Acronyms: MUST include periods and expanded forms ONLY for established/recognized acronyms
-  - From acronym: DIP → DIP OR D.I.P. OR "debtor in possession"
-  - From full form with known acronym: "Internal Revenue Service" → IRS OR I.R.S. OR "Internal Revenue Service"
+- Acronyms: MUST include the full expanded form and preserve the acronym punctuation style as written in the input (do NOT add the alternate dotted/undotted style)
+  - From acronym: DIP → DIP OR "debtor in possession" (preserve undotted)
+  - From dotted acronym: I.R.S. → I.R.S. OR "Internal Revenue Service" (preserve dotted)
+  - From full form with known acronym: "Internal Revenue Service" → IRS OR "Internal Revenue Service" (prefer undotted acronym unless the input used dotted)
   - Do NOT create acronyms that don't exist in common usage
-- Contractions: MUST include both forms (can't OR cannot OR "can not")
+- Hyphenation variations: DO NOT add hyphenated/spaced alternates; preserve whatever hyphenation appears in the input
+- Contractions: DO NOT add contracted/expanded alternates; leave contractions as written
 - Related variations: MUST be grouped with parentheses
 
 REQUIRED EFFICIENCY:

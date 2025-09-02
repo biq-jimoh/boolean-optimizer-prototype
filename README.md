@@ -4,7 +4,7 @@ A sophisticated system that uses OpenAI's Agents SDK to optimize Boolean queries
 
 ## Features
 
-- **16 Specialized Consultant Agents**: Each focusing on specific query optimization techniques
+- **14 Specialized Consultant Agents**: Each focusing on specific query optimization techniques
 - **Parallel Processing**: All consultants run simultaneously for fast results
 - **Structured Outputs**: Reliable, consistent results using Pydantic models
 - **4 Optimization Levels**: From basic corrections to comprehensive enhancements
@@ -69,7 +69,7 @@ python optimize_query.py --json "Till v. SCS Credit"
 from bankruptcy_query_optimizer import BankruptcyQueryOptimizer
 
 # Initialize optimizer
-optimizer = BankruptcyQueryOptimizer(model="gpt-4.1")
+optimizer = BankruptcyQueryOptimizer(model="gpt-5")
 
 # Optimize a query
 result = optimizer.optimize_query_sync("preference action")
@@ -96,12 +96,10 @@ The system includes 16 consultant agents, each specializing in different optimiz
 
 **Automatic Corrections (AC):**
 - AC-1: Fix typos
-- AC-2: Add hyphenation variations
 - AC-3: Expand acronyms
 - AC-4: Quote statute citations
 - AC-5: Add statute citation variations
 - AC-6: Convert case names to proximity format
-- AC-7: Add contraction variations
 
 **Suggestion Improvements (SI):**
 - SI-1: Add root extenders
@@ -118,7 +116,7 @@ The system includes 16 consultant agents, each specializing in different optimiz
 
 The executive agent synthesizes consultant recommendations into 4 versions:
 
-1. **Version 1**: Basic corrections only (AC-1 through AC-7)
+1. **Version 1**: Basic corrections only (AC-1, AC-3, AC-4, AC-5, AC-6)
 2. **Version 2**: Version 1 + base improvements (SI-1, SI-2, SI-3, SI-5, SI-9)
 3. **Version 3**: Version 2 + broadening suggestions (SI-4, SI-7, SI-8)
 4. **Version 4**: Version 2 + narrowing suggestion (SI-6)
@@ -145,8 +143,8 @@ Input query: `preference action trustee motion`
 
 ```python
 optimizer = BankruptcyQueryOptimizer(
-    model="gpt-4.1",
-    temperature=0.1,  # Lower for more consistent output
+    model="gpt-5",
+    temperature=0.1,  # Ignored for gpt-5; applies to non-GPT-5 models
     consultants_dir="custom/consultants",
     executive_path="custom/executive.txt"
 )
@@ -191,7 +189,7 @@ for consultant, details in result['consultant_details'].items():
 - **Concurrency**: Default max concurrent consultants is 10 (configurable)
 - **Execution Time**: Typically 5-15 seconds per query
 - **Rate Limits**: Built-in semaphore prevents overwhelming API limits
-- **Model**: Uses gpt-4.1 by default for high-quality results
+- **Model**: Uses gpt-5 by default for high-quality results
 
 ## Troubleshooting
 

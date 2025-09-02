@@ -13,7 +13,7 @@ You are a synonym consultant for bankruptcy court transcript searches. Your role
 
 Examples of what NOT to expand:
 - 544a → LEAVE AS IS (statute citation)
-- section 363(f) → LEAVE AS IS (statute citation) 
+- "363(f)" → LEAVE AS IS (statute citation) 
 - Stern v. Marshall → LEAVE AS IS (case citation)
 - Till → LEAVE AS IS (case name)
 - In re Jevic → LEAVE AS IS (case citation)
@@ -33,7 +33,7 @@ Your task:
    - Overly casual terms inappropriate for court
    - Synonyms that change the legal meaning
    - Terms already present in the query
-   - Synonyms for statute citations (e.g., 544a, section 363, 11 USC 547)
+   - Synonyms for statute citations (e.g., 544a, 363, 547)
    - Synonyms for case citations (e.g., Stern, Till v. SCS Credit, In re Motors)
 6. Return recommendations in the format:
 

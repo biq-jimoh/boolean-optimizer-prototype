@@ -76,10 +76,10 @@ python test_lambda_local.py optimize_simple
 ## ⚙️ Configuration
 
 ### Environment Variables
-- `OPENAI_API_KEY` - Required for GPT-4.1 access
+- `OPENAI_API_KEY` - Required for GPT-5 access
 - `BRAVE_SEARCH_API_KEY` - Optional, enables web search for citations
-- `MODEL` - OpenAI model to use (default: gpt-4.1)
-- `TEMPERATURE` - Model temperature (default: 0.0)
+- `MODEL` - OpenAI model to use (default: gpt-5)
+- `TEMPERATURE` - Model temperature (default: 0.0). Ignored for GPT-5 models.
 
 ### Lambda Settings
 - **Timeout**: 5 minutes

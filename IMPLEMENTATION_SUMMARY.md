@@ -102,7 +102,7 @@ python3 demo_optimizer.py
 ```python
 from bankruptcy_query_optimizer import BankruptcyQueryOptimizer
 
-optimizer = BankruptcyQueryOptimizer(model="gpt-4.1")
+optimizer = BankruptcyQueryOptimizer(model="gpt-5")
 result = optimizer.optimize_query_sync("your query here")
 
 # Access results
@@ -136,4 +136,4 @@ To start using the system:
    python3 optimize_query.py "test query"
    ```
 
-The system is now ready for production use with gpt-4.1 as specified!
+The system is now ready for production use with gpt-5 as specified!

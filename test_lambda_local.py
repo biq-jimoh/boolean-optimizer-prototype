@@ -120,9 +120,15 @@ def test_endpoint(name: str, event: dict):
 
 def main():
     """Run all tests or specific test."""
-    # Check for API key
+    # Check for API key; fallback to .env if missing
     if not os.getenv("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY environment variable not set")
+        try:
+            from dotenv import load_dotenv, find_dotenv
+            load_dotenv(find_dotenv(), override=False)
+        except Exception:
+            pass
+    if not os.getenv("OPENAI_API_KEY"):
+        print("Error: OPENAI_API_KEY environment variable not set (you can add it to a .env file)")
         sys.exit(1)
     
     # Parse arguments

@@ -128,10 +128,10 @@ Examples:
                        help='Output results as JSON')
     
     # Model options
-    parser.add_argument('--model', default='gpt-4.1',
-                       help='Model to use (default: gpt-4.1)')
+    parser.add_argument('--model', default='gpt-5',
+                       help='Model to use (default: gpt-5)')
     parser.add_argument('--temperature', type=float, default=0.0,
-                       help='Model temperature (default: 0.0)')
+                       help='Model temperature (ignored for gpt-5)')
     
     # Other options
     parser.add_argument('--no-logging', action='store_true',
@@ -150,9 +150,17 @@ Examples:
     if args.query and args.file:
         parser.error('Cannot specify both a query and a file')
     
-    # Check for API key
+    # Check for API key; fallback to loading from .env if missing
     if not os.getenv("OPENAI_API_KEY"):
-        print("Error: OPENAI_API_KEY environment variable not set", file=sys.stderr)
+        try:
+            from dotenv import load_dotenv, find_dotenv
+            # Load .env only as a fallback; do not override existing env
+            load_dotenv(find_dotenv(), override=False)
+        except Exception:
+            # If python-dotenv isn't available, proceed to the next check
+            pass
+    if not os.getenv("OPENAI_API_KEY"):
+        print("Error: OPENAI_API_KEY environment variable not set (you can add it to a .env file)", file=sys.stderr)
         sys.exit(1)
     
     # Initialize optimizer

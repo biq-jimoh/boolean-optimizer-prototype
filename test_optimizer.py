@@ -47,13 +47,13 @@ def test_optimizer_initialization():
     
     try:
         optimizer = BankruptcyQueryOptimizer(
-            model="gpt-4.1",
+            model="gpt-5",
             temperature=0.0,
             enable_logging=False
         )
         
         summary = optimizer.get_agent_summary()
-        assert summary['model'] == "gpt-4.1"
+        assert summary['model'] == "gpt-5"
         assert summary['consultant_count'] > 0
         assert summary['executive_loaded'] == True
         
@@ -147,14 +147,14 @@ def test_consultant_recommendation_format():
     from bankruptcy_query_optimizer import ConsultantRecommendation
     
     rec = ConsultantRecommendation(
-        original="roll-up",
-        replacement='roll-up OR rollup OR "roll up"',
-        reason="adding hyphenation variations"
+        original="object",
+        replacement='object!',
+        reason="add root extender"
     )
     
     # Test string representation
     formatted = f"- {rec.original} is changed to {rec.replacement} ({rec.reason})"
-    expected = '- roll-up is changed to roll-up OR rollup OR "roll up" (adding hyphenation variations)'
+    expected = '- object is changed to object! (add root extender)'
     
     assert formatted == expected
     print("✓ Consultant recommendation formatting correct")
@@ -167,6 +167,13 @@ async def run_all_tests():
     print("="*60)
     
     # Check API key
+    if not os.getenv("OPENAI_API_KEY"):
+        # Fallback: try loading from .env without overriding existing env
+        try:
+            from dotenv import load_dotenv, find_dotenv
+            load_dotenv(find_dotenv(), override=False)
+        except Exception:
+            pass
     if not os.getenv("OPENAI_API_KEY"):
         print("\n⚠️  WARNING: OPENAI_API_KEY not set!")
         print("   API-dependent tests will be skipped.")

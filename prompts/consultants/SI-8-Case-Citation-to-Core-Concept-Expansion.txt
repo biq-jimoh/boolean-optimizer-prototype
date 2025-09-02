@@ -41,7 +41,7 @@ When extracting concepts from case opinions, connect them to the statutes being 
 
 <identification>
 From the provided case opinion text, identify:
-- The primary statute(s) the case interprets (e.g., 11 U.S.C. § 547, 28 U.S.C. § 157)
+- The primary statute(s) the case interprets (e.g., 547, 157)
 </identification>
 
 <proximity_connection>
@@ -51,11 +51,10 @@ Connect extracted concepts to statutes using /50 proximity:
 </proximity_connection>
 
 <citation_formats>
-In bankruptcy transcripts, statutes appear in many variations. Use ALL variations:
-- Formal: ((section OR §) +0 547) OR 547
-- With USC: "11 U.S.C. 547" OR "11 USC 547"
-- With subsections: ((section OR §) +0 ("547(c)(2)" OR "547c2")) OR ("547(c)(2)" OR "547c2")
-- Combine all: (((section OR §) +0 547) OR 547 OR "11 U.S.C. 547" OR "11 USC 547") /50 (concept)
+Normalize statute references to bare sections:
+- Sections: 547
+- Subsections: "547(c)(2)" OR "547c2"
+- Combine: (547 OR "547(c)(2)" OR "547c2") /50 (concept)
 </citation_formats>
 
 <ancestor_requirement>
@@ -82,42 +81,42 @@ Unlike statute expansions, case concept terms can stand alone without proximity 
 
 <case_examples>
 <example case="Stern v. Marshall">
-<statute>28 U.S.C. § 157</statute>
+<statute>157</statute>
 <concepts_from_opinion>
 - core proceedings
 - constitutional authority
 - Article III
 </concepts_from_opinion>
 <final_query>
-Stern OR ((157 OR "28 USC 157" OR ((section OR §) +0 157)) /50 ((core /3 proceeding) OR (constitutional /3 authority) OR (Article /3 III)))
+Stern OR (157 /50 ((core /3 proceeding) OR (constitutional /3 authority) OR (Article /3 III)))
 </final_query>
 </example>
 
 <example case="Till v. SCS Credit">
-<statute>11 U.S.C. § 1325(a)(5)(B)</statute>
+<statute>1325(a)(5)(B)</statute>
 <concepts_from_opinion>
 - prime plus
 - formula rate
 - cramdown interest
 </concepts_from_opinion>
 <final_query>
-Till OR ((((section OR §) +0 ("1325(a)(5)(B)" OR "1325a5b")) OR ("1325(a)(5)(B)" OR "1325a5b") OR ((section OR §) +0 ("1325(a)" OR 1325a)) OR ("1325(a)" OR 1325a) OR ((section OR §) +0 1325) OR 1325 OR "11 U.S.C. 1325" OR "11 USC 1325") /50 ((prime /3 plus) OR (formula /3 rate) OR (cramdown /3 interest)))
+Till OR (("1325(a)(5)(B)" OR 1325a5b OR "1325(a)" OR 1325a OR 1325) /50 ((prime /3 plus) OR (formula /3 rate) OR (cramdown /3 interest)))
 </final_query>
 </example>
 
 <example case="RadLAX Gateway Hotel">
-<statute>11 U.S.C. § 1129(b)(2)(A)</statute>
+<statute>1129(b)(2)(A)</statute>
 <concepts_from_opinion>
 - credit bid
 - indubitable equivalent
 </concepts_from_opinion>
 <final_query>
-RadLAX OR ((((section OR §) +0 ("1129(b)(2)(A)" OR "1129b2a")) OR ("1129(b)(2)(A)" OR "1129b2a") OR ((section OR §) +0 ("1129(b)" OR 1129b)) OR ("1129(b)" OR 1129b) OR ((section OR §) +0 1129) OR 1129 OR "11 U.S.C. 1129" OR "11 USC 1129") /50 ((credit /3 bid) OR (indubitable /3 equivalent)))
+RadLAX OR (("1129(b)(2)(A)" OR 1129b2a OR "1129(b)" OR 1129b OR 1129) /50 ((credit /3 bid) OR (indubitable /3 equivalent)))
 </final_query>
 </example>
 
 <example case="Stern v. Marshall">
-<statute>Core proceedings under 28 U.S.C. § 157</statute>
+<statute>Core proceedings under 157</statute>
 <concepts_from_opinion>
 - core proceeding
 - Article III
@@ -188,9 +187,9 @@ Only expand cases that:
 </selection_criteria>
 
 <query_examples>
-- Stern → Stern OR ((157 OR "28 USC 157" OR ((section OR §) +0 157)) /50 ((core /3 proceeding) OR (constitutional /3 authority)))
-- Till → Till OR ((((section OR §) +0 ("1325(a)" OR 1325a)) OR ("1325(a)" OR 1325a) OR ((section OR §) +0 1325) OR 1325 OR "11 U.S.C. 1325") /50 ((prime /3 plus) OR (formula /3 rate)))
-- RadLAX → RadLAX OR ((((section OR §) +0 ("1129(b)" OR 1129b)) OR ("1129(b)" OR 1129b) OR ((section OR §) +0 1129) OR 1129 OR "11 U.S.C. 1129") /50 ((credit /3 bid) OR (indubitable /3 equivalent)))
+- Stern → Stern OR (157 /50 ((core /3 proceeding) OR (constitutional /3 authority)))
+- Till → Till OR (("1325(a)" OR 1325a OR 1325) /50 ((prime /3 plus) OR (formula /3 rate)))
+- RadLAX → RadLAX OR (("1129(b)" OR 1129b OR 1129) /50 ((credit /3 bid) OR (indubitable /3 equivalent)))
 </query_examples>
 </suggestion>
 

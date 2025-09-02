@@ -35,7 +35,7 @@ def get_optimizer() -> BankruptcyQueryOptimizer:
         _optimizer = BankruptcyQueryOptimizer(
             consultants_dir=os.environ.get('CONSULTANTS_DIR', 'prompts/consultants'),
             executive_path=os.environ.get('EXECUTIVE_PATH', 'prompts/executive/executive-agent.txt'),
-            model=os.environ.get('MODEL', 'gpt-4.1'),
+            model=os.environ.get('MODEL', 'gpt-5'),
             temperature=float(os.environ.get('TEMPERATURE', '0.0')),
             enable_logging=False,  # Disable internal logging for Lambda
             brave_api_key=os.environ.get('BRAVE_SEARCH_API_KEY')

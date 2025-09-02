@@ -6,6 +6,7 @@ Uses the Agent SDK to detect statute and case citations in queries.
 from typing import Optional, Dict, List
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, ModelSettings
+from openai.types.shared import Reasoning
 
 
 class StatuteCitation(BaseModel):
@@ -36,9 +37,15 @@ class CaseCitationsOutput(BaseModel):
 class CitationDetector:
     """Detects legal citations in queries using LLM agents."""
     
-    def __init__(self, model: str = "gpt-4.1", temperature: float = 0.0):
+    def __init__(self, model: str = "gpt-5", temperature: float = 0.0):
         self.model = model
-        self.model_settings = ModelSettings(temperature=temperature, max_tokens=500)
+        temp_for_model = None if str(model).startswith("gpt-5") else temperature
+        self.model_settings = ModelSettings(
+            temperature=temp_for_model,
+            max_tokens=500,
+            reasoning=None,
+            extra_body={"reasoning": {"effort": "minimal"}}
+        )
         
         # Create specialized agents for detection
         self.statute_detector = Agent(

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, ModelSettings
+from openai.types.shared import Reasoning
 import time
 from datetime import datetime
 
@@ -80,16 +81,20 @@ class BankruptcyQueryOptimizer:
     def __init__(self, 
                  consultants_dir: str = "prompts/consultants", 
                  executive_path: str = "prompts/executive/executive-agent.txt",
-                 model: str = "gpt-4.1",
+                 model: str = "gpt-5",
                  temperature: float = 0.0,
                  enable_logging: bool = True,
                  brave_api_key: Optional[str] = None):
         self.consultants_dir = Path(consultants_dir)
         self.executive_path = Path(executive_path)
         self.model = model
+        # GPT-5 models ignore temperature; keep for others
+        temp_for_model = None if str(model).startswith("gpt-5") else temperature
         self.model_settings = ModelSettings(
-            temperature=temperature,
-            parallel_tool_calls=False
+            temperature=temp_for_model,
+            parallel_tool_calls=False,
+            reasoning=None,
+            extra_body={"reasoning": {"effort": "minimal"}}
         )
         self.consultant_agents = []
         self.executive_agent = None
@@ -135,9 +140,17 @@ class BankruptcyQueryOptimizer:
         
         # Load consultant agents with structured output
         consultant_files = sorted(self.consultants_dir.glob("*.txt"))
+        # Skip disabled consultants (AC-2 hyphenation variations, AC-7 contraction variations)
+        disabled_consultant_prefixes = {
+            "AC-2-Add-hyphenation-variations",
+            "AC-7-Add-contraction-variations",
+        }
         self._log(f"Found {len(consultant_files)} consultant prompt files")
         
         for prompt_file in consultant_files:
+            if prompt_file.stem in disabled_consultant_prefixes:
+                self._log(f"Skipping disabled consultant: {prompt_file.stem}")
+                continue
             try:
                 with open(prompt_file, 'r') as f:
                     original_instructions = f.read()
@@ -779,7 +792,6 @@ Recommendations to review:
         
         # Step 6: Process structured executive output
         executive_output: ExecutiveOutput = executive_result.final_output
-        
         execution_time = time.time() - start_time
         self._log(f"Optimization completed in {execution_time:.2f} seconds")
         

@@ -16,7 +16,7 @@ provider:
     BRAVE_SEARCH_API_KEY: ${env:BRAVE_SEARCH_API_KEY, ''}
     CONSULTANTS_DIR: prompts/consultants
     EXECUTIVE_PATH: prompts/executive/executive-agent.txt
-    MODEL: ${env:MODEL, 'gpt-4.1'}
+    MODEL: ${env:MODEL, 'gpt-5'}
     TEMPERATURE: ${env:TEMPERATURE, '0.0'}
     LOG_LEVEL: ${env:LOG_LEVEL, 'INFO'}
   

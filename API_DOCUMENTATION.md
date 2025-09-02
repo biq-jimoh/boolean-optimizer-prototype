@@ -174,7 +174,7 @@ Check API health and configuration.
 ```json
 {
   "status": "healthy",
-  "model": "gpt-4.1",
+  "model": "gpt-5",
   "consultants": 16,
   "brave_search_enabled": true
 }
@@ -196,12 +196,12 @@ Get information about available consultant agents.
       "active": true
     },
     {
-      "id": "AC-2",
-      "name": "Consultant AC-2",
+      "id": "AC-3",
+      "name": "Consultant AC-3",
       "active": true
     }
   ],
-  "total": 16
+  "total": 14
 }
 ```
 

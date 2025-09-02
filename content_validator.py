@@ -7,6 +7,7 @@ Now works with raw HTML for better accuracy.
 from typing import Dict
 from pydantic import BaseModel, Field
 from agents import Agent, Runner, ModelSettings
+from openai.types.shared import Reasoning
 
 
 class ValidationOutput(BaseModel):
@@ -19,9 +20,15 @@ class ValidationOutput(BaseModel):
 class ContentValidator:
     """Validates that web search results contain the correct legal content."""
     
-    def __init__(self, model: str = "gpt-4.1", temperature: float = 0.0):
+    def __init__(self, model: str = "gpt-5", temperature: float = 0.0):
         self.model = model
-        self.model_settings = ModelSettings(temperature=temperature, max_tokens=500)
+        temp_for_model = None if str(model).startswith("gpt-5") else temperature
+        self.model_settings = ModelSettings(
+            temperature=temp_for_model,
+            max_tokens=500,
+            reasoning=None,
+            extra_body={"reasoning": {"effort": "minimal"}}
+        )
         
         # Create validation agents
         self.statute_validator = Agent(
@@ -34,8 +41,9 @@ Be strict in your validation:
 - The page MUST be from law.cornell.edu (Legal Information Institute)
 - Look for the specific statute section and subsection in the HTML
 - Understand that citations like "363a" mean section 363(a)
-- Check for HTML anchors like <a name="a"> for subsections
+- Check for HTML anchors like <a name='a'> for subsections (use single quotes in examples)
 
+Return ONLY valid JSON with these fields (no extra text). Ensure proper JSON escaping; when referencing HTML attributes in the reason, prefer single quotes.
 Return a structured response with:
 - is_valid: true only if you're certain this page contains the requested provision
 - confidence: 0.0 to 1.0 (use 0.9+ only for clear matches)
@@ -57,6 +65,7 @@ Be strict in your validation:
 - Check for judge names, court information, and legal analysis
 - The URL might have tabs like /authorities/ - these are NOT the opinion
 
+Return ONLY valid JSON with these fields (no extra text). Ensure proper JSON escaping; avoid unescaped double quotes in the reason.
 Return a structured response with:
 - is_valid: true only if this contains the actual court opinion
 - confidence: 0.0 to 1.0 (use 0.9+ only for clear matches)

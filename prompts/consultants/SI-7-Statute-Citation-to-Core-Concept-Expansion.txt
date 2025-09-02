@@ -45,25 +45,25 @@ NEVER connect to the exact citation being searched - that defeats the purpose.
 </fundamental_rule>
 
 <citation_format_rule>
-When connecting to ancestors, use the full citation variation format:
-- For sections: ((section OR §) +0 362) OR 362
-- For subsections: ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)
-- For deeper provisions: ((section OR §) +0 ("547(c)(2)" OR "547c2")) OR ("547(c)(2)" OR "547c2")
+When connecting to ancestors, normalize citations to bare sections with parenthetical and compressed forms:
+- For sections: 362
+- For subsections: "362(d)" OR 362d
+- For deeper provisions: "547(c)(2)" OR "547c2"
 </citation_format_rule>
 
 <examples>
-Query searching for: ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)
+Query searching for: "362(d)" OR 362d
 Add concepts from 362(d) near ancestor citations:
-- (((section OR §) +0 362) OR 362) /50 ((lack /3 adequate! /3 protect!) OR (equity /3 cushion))
+- 362 /50 ((lack /3 adequate! /3 protect!) OR (equity /3 cushion))
 
 Query searching for: 547c2
 Add concepts from 547(c)(2) near ancestor citations:
-- (((section OR §) +0 ("547(c)" OR 547c)) OR ("547(c)" OR 547c)) /50 (ordinary /3 course /3 business)
-- (((section OR §) +0 547) OR 547) /50 (ordinary /3 course /3 business)
+- ("547(c)" OR 547c) /50 (ordinary /3 course /3 business)
+- 547 /50 (ordinary /3 course /3 business)
 
-Query searching for: ((section OR §) +0 ("544(a)" OR 544a)) OR ("544(a)" OR 544a)
+Query searching for: "544(a)" OR 544a
 Add concepts from 544(a) near ancestor citations:
-- (((section OR §) +0 544) OR 544) /50 ((bona /3 fide /3 purchaser) OR (judicial /3 lien))
+- 544 /50 ((bona /3 fide /3 purchaser) OR (judicial /3 lien))
 </examples>
 </proximity_hierarchy>
 
@@ -137,27 +137,27 @@ With them: (cash /3 collateral) OR deposits correctly finds "cash collateral" or
 <provision_examples>
 <example provision="547(c)(2)">
 <title>ordinary course defense - deep provision</title>
-<input_query>((section OR §) +0 ("547(c)(2)" OR "547c2")) OR ("547(c)(2)" OR "547c2")</input_query>
+<input_query>"547(c)(2)" OR "547c2"</input_query>
 <expansion>
 Connect 547(c)(2) concepts to ancestors:
-- (((section OR §) +0 ("547(c)" OR 547c)) OR ("547(c)" OR 547c)) /50 (ordinary /3 course /3 business)
-- (((section OR §) +0 547) OR 547) /50 (ordinary /3 course /3 business)
+- ("547(c)" OR 547c) /50 (ordinary /3 course /3 business)
+- 547 /50 (ordinary /3 course /3 business)
 NOT to the exact citation being searched
 </expansion>
 </example>
 
 <example provision="362(d)">
 <title>relief from stay - subsection</title>
-<input_query>((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d)</input_query>
+<input_query>"362(d)" OR 362d</input_query>
 <expansion>
 Connect 362(d) concepts to section ancestor:
-- (((section OR §) +0 362) OR 362) /50 ((lack /3 adequate! /3 protect!) OR (equity /3 cushion) OR cause OR relief)
+- 362 /50 ((lack /3 adequate! /3 protect!) OR (equity /3 cushion) OR cause OR relief)
 </expansion>
 </example>
 
 <example provision="544">
 <title>trustee avoidance powers - SECTION LEVEL</title>
-<input_query>((section OR §) +0 544) OR 544</input_query>
+<input_query>544</input_query>
 <expansion>
 Section-level exception applies:
 Most terms cannot be added - "strong arm", "bona fide purchaser", etc. are too generic without proximity
@@ -167,46 +167,46 @@ Proximity to 544 would be pointless since we're already searching for 544
 
 <example provision="507(a)(5)">
 <title>employee benefit plan priority with ERISA</title>
-<input_query>"11 U.S.C. 507(a)(5)"</input_query>
+<input_query>"507(a)(5)"</input_query>
 <expansion>
 Connect 507(a)(5) concepts to ancestors:
-- "11 U.S.C. 507(a)(5)" AND (("employee benefit plan" /3 (ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act")) OR contributions OR ("180 days" /3 (petition OR cessation)))
+- "507(a)(5)" AND (("employee benefit plan" /3 (ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act")) OR contributions OR ("180 days" /3 (petition OR cessation)))
 </expansion>
 </example>
 
 <example provision="363(b)">
 <title>sale outside ordinary course</title>
-<input_query>"11 U.S.C. 363(b) sale"</input_query>
+<input_query>"363(b)" sale</input_query>
 <expansion>
 Connect 363(b) concepts:
-- "11 U.S.C. 363(b)" AND (sale OR sell) AND (("ordinary course" /3 business) OR (notice /3 hearing) OR ("business judgment" /3 rule))
+- "363(b)" AND (sale OR sell) AND (("ordinary course" /3 business) OR (notice /3 hearing) OR ("business judgment" /3 rule))
 </expansion>
 </example>
 
 <example provision="727">
 <title>discharge denial with BAPCPA</title>
-<input_query>"11 U.S.C. 727 BAPCPA"</input_query>
+<input_query>727 BAPCPA</input_query>
 <expansion>
 Connect 727 concepts:
-- "11 U.S.C. 727" AND ((BAPCPA OR B.A.P.C.P.A. OR "Bankruptcy Abuse Prevention and Consumer Protection Act") OR discharge OR ("means test" /3 abuse))
+- 727 AND ((BAPCPA OR B.A.P.C.P.A. OR "Bankruptcy Abuse Prevention and Consumer Protection Act") OR discharge OR ("means test" /3 abuse))
 </expansion>
 </example>
 
 <example provision="503">
 <title>administrative expense with WARN Act</title>
-<input_query>"warn act claims under 11 U.S.C. 503"</input_query>
+<input_query>"warn act claims under 503"</input_query>
 <expansion>
 Connect 503 concepts:
-- "11 U.S.C. 503" AND ((WARN OR W.A.R.N. OR "Worker Adjustment and Retraining Notification") /5 (Act OR claims)) AND (administrative /3 (expense OR priority))
+- 503 AND ((WARN OR W.A.R.N. OR "Worker Adjustment and Retraining Notification") /5 (Act OR claims)) AND (administrative /3 (expense OR priority))
 </expansion>
 </example>
 
-<example provision="29 U.S.C. 1001">
+<example provision="1001">
 <title>ERISA in bankruptcy context</title>
-<input_query>"29 U.S.C. 1001 ERISA bankruptcy"</input_query>
+<input_query>"1001 ERISA bankruptcy"</input_query>
 <expansion>
 Connect ERISA concepts:
-- "29 U.S.C. 1001" AND ((ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act") /5 (bankruptcy OR "pension plan" OR "benefit plan"))
+- 1001 AND ((ERISA OR E.R.I.S.A. OR "Employee Retirement Income Security Act") /5 (bankruptcy OR "pension plan" OR "benefit plan"))
 </expansion>
 </example>
 </provision_examples>
@@ -214,25 +214,25 @@ Connect ERISA concepts:
 <query_examples>
 PROVISION QUERIES (connect to ancestors):
 
-- ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d) → 
-  ((section OR §) +0 ("362(d)" OR 362d)) OR ("362(d)" OR 362d) OR ((((section OR §) +0 362) OR 362) /50 ((lack /3 adequate! /3 protect!) OR (equity /3 cushion) OR cause OR relief))
+- "362(d)" OR 362d → 
+  "362(d)" OR 362d OR (362 /50 ((lack /3 adequate! /3 protect!) OR (equity /3 cushion) OR cause OR relief))
 
 - 547c2 → 
-  547c2 OR ((((section OR §) +0 ("547(c)" OR 547c)) OR ("547(c)" OR 547c)) /50 (ordinary /3 course /3 business)) OR ((((section OR §) +0 547) OR 547) /50 (ordinary /3 course /3 business))
+  547c2 OR (("547(c)" OR 547c) /50 (ordinary /3 course /3 business)) OR (547 /50 (ordinary /3 course /3 business))
 
-- "11 USC 544(a)" OR 544a → 
-  "11 USC 544(a)" OR 544a OR ((((section OR §) +0 544) OR 544) /50 ((bona /3 fide /3 purchaser) OR (judicial /3 lien) OR (strong /3 arm)))
+- "544(a)" OR 544a → 
+  "544(a)" OR 544a OR (544 /50 ((bona /3 fide /3 purchaser) OR (judicial /3 lien) OR (strong /3 arm)))
 
-- ((section OR §) +0 ("522(f)" OR 522f)) OR ("522(f)" OR 522f) → 
-  ((section OR §) +0 ("522(f)" OR 522f)) OR ("522(f)" OR 522f) OR ((((section OR §) +0 522) OR 522) /50 ((household /3 goods) OR (tools /3 trade) OR impair!))
+- "522(f)" OR 522f → 
+  "522(f)" OR 522f OR (522 /50 ((household /3 goods) OR (tools /3 trade) OR impair!))
 
-- ((section OR §) +0 ("548(a)(1)" OR "548a1")) OR ("548(a)(1)" OR "548a1") → 
-  ((section OR §) +0 ("548(a)(1)" OR "548a1")) OR ("548(a)(1)" OR "548a1") OR ((((section OR §) +0 ("548(a)" OR 548a)) OR ("548(a)" OR 548a)) /50 (actual /3 intent)) OR ((((section OR §) +0 548) OR 548) /50 ((hinder /3 delay /3 defraud) OR fraudulent))
+- "548(a)(1)" OR "548a1" → 
+  "548(a)(1)" OR "548a1" OR (("548(a)" OR 548a) /50 (actual /3 intent)) OR (548 /50 ((hinder /3 delay /3 defraud) OR fraudulent))
 
 SECTION-LEVEL QUERIES (exception applies):
 
-- ((section OR §) +0 362) OR 362 →
-  ((section OR §) +0 362) OR 362
+- 362 →
+  362
   [Note: "automatic stay" is core to entire section; no truly unique standalone terms]
 
 - 544 →
