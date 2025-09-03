@@ -40,7 +40,23 @@ def get_optimizer() -> BankruptcyQueryOptimizer:
             enable_logging=False,  # Disable internal logging for Lambda
             brave_api_key=os.environ.get('BRAVE_SEARCH_API_KEY')
         )
-        logger.info("Optimizer initialized successfully")
+        # Log model and settings used
+        try:
+            reasoning_effort = None
+            try:
+                reasoning_effort = _optimizer.model_settings.extra_body.get('reasoning', {}).get('effort')
+            except Exception:
+                reasoning_effort = None
+            logger.info(
+                "Optimizer initialized successfully | model=%s temperature=%s reasoning_effort=%s parallel_tool_calls=%s brave_search_enabled=%s",
+                _optimizer.model,
+                os.environ.get('TEMPERATURE', '0.0'),
+                reasoning_effort,
+                getattr(_optimizer.model_settings, 'parallel_tool_calls', None),
+                bool(_optimizer.brave_api_key),
+            )
+        except Exception:
+            logger.info("Optimizer initialized successfully")
     return _optimizer
 
 

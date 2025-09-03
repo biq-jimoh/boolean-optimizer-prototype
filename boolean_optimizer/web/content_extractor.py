@@ -4,6 +4,7 @@ Uses browser-like headers, HTTP/2, delays, and Playwright fallback for WAF bypas
 """
 
 from typing import Optional
+import os
 import httpx
 import asyncio
 from urllib.parse import urlparse
@@ -15,7 +16,9 @@ try:
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:
     PLAYWRIGHT_AVAILABLE = False
-    print("Note: Playwright not available. Install with 'pip install playwright && playwright install chromium' for better WAF bypass.")
+    # Suppress noisy note in Lambda; enable via env if desired
+    if os.getenv("PRINT_PLAYWRIGHT_NOTE", "0") == "1":
+        print("Note: Playwright not available. Install with 'pip install playwright && playwright install chromium' for better WAF bypass.")
 
 
 class ContentExtractor:
@@ -83,30 +86,37 @@ class ContentExtractor:
         Returns:
             Tuple of (content, success_bool)
         """
+        headers = self._get_headers_for_url(url)
+        # First attempt: HTTP/2
         try:
-            headers = self._get_headers_for_url(url)
-            
             async with httpx.AsyncClient(
-                http2=True,  # Use HTTP/2 like modern browsers
+                http2=True,
                 follow_redirects=True,
-                verify=True,  # Verify SSL certificates
+                verify=True,
             ) as client:
-                response = await client.get(
-                    url, 
-                    headers=headers,
-                    timeout=self.timeout,
-                )
-                
-                # Check for WAF challenges
+                response = await client.get(url, headers=headers, timeout=self.timeout)
                 if response.status_code == 202 and response.headers.get('x-amzn-waf-action') == 'challenge':
                     print(f"WAF challenge detected for {url}")
                     return "WAF_CHALLENGE", False
-                
                 response.raise_for_status()
-                print(f"Successfully fetched {url} with httpx (status: {response.status_code})")
+                print(f"Successfully fetched {url} with httpx HTTP/2 (status: {response.status_code})")
                 return response.text, True
-                
         except Exception as e:
+            # If HTTP/2 isn't available (missing 'h2'), fallback to HTTP/1.1
+            if "http2=True" in str(e) or "h2" in str(e):
+                try:
+                    async with httpx.AsyncClient(
+                        http2=False,
+                        follow_redirects=True,
+                        verify=True,
+                    ) as client:
+                        response = await client.get(url, headers=headers, timeout=self.timeout)
+                        response.raise_for_status()
+                        print(f"Successfully fetched {url} with httpx HTTP/1.1 (fallback)")
+                        return response.text, True
+                except Exception as e2:
+                    print(f"HTTP/1.1 fallback failed for {url}: {e2}")
+                    return f"Error: {str(e2)}", False
             print(f"Error with httpx fetch from {url}: {e}")
             return f"Error: {str(e)}", False
     
